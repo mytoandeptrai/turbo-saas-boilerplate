@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: turbo-saas-api
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: >-
+      corepack enable &&
+      pnpm install --frozen-lockfile &&
+      pnpm turbo run build --filter=api... &&
+      pnpm --filter @workspace/database db:migrate:deploy
+    startCommand: pnpm --filter api start:prod
+    healthCheckPath: /health
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - apps/api/**
+        - packages/database/**
+        - pnpm-lock.yaml
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "24"
+      # Secrets: set in the Render dashboard (sync: false keeps them out of git).
+      # DATABASE_URL must point sslcert to the Secret File, e.g.
+      # ...?sslmode=require&sslcert=/etc/secrets/aiven-ca.pem
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        sync: false
