@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client'
 
 export type CreatePrismaClientOptions = {
   datasourceUrl?: string
-  log?: Array<'query' | 'info' | 'warn' | 'error'>
+  log?: ('query' | 'info' | 'warn' | 'error')[]
 }
 
 /**
