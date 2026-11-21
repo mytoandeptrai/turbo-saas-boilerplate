@@ -2,7 +2,7 @@
 
 | | |
 | --- | --- |
-| Trạng thái | Bản nháp (Phase 1) — chờ review kiến trúc ở Phase 2 |
+| Trạng thái | **Đã phê duyệt có điều kiện** (xem mục 8) — được phép triển khai |
 | Phạm vi | `packages/database`, `apps/api`, `packages/api-types`, `apps/admin-shadcn` |
 | Tham chiếu | [`rezonia/invoice-processor`](https://github.com/rezonia/invoice-processor) (Go), `docs/architecture.md`, `docs/api-conventions.md`, `.claude/rules/*` |
 
@@ -314,7 +314,16 @@ Thứ tự nhận diện: `HDon` (chuẩn 1450) → `SInvoice` (VNPT) → `EInvo
 
 Dung sai: **±1 đơn vị tiền tệ cho mỗi dòng hàng tham gia phép cộng** (tối thiểu 1) đối với các quy tắc tổng, vì nhà cung cấp làm tròn thuế theo từng dòng. `TOTAL_MISMATCH` dùng dung sai cố định 1. Hóa đơn `MISMATCH` **vẫn được lưu** và hiển thị cảnh báo: người dùng cần thấy nó để yêu cầu người bán lập hóa đơn điều chỉnh, không phải để hệ thống giấu đi.
 
-### 4.6. Điều kiện bắt buộc (lỗi `INVALID`, không lưu)
+### 4.6. Xử lý file đầu vào an toàn
+
+- **Nhận diện theo nội dung, không tin `mimetype`/đuôi file** do client gửi: bỏ BOM và khoảng trắng đầu, bắt đầu bằng `<` → XML; bắt đầu bằng `%PDF-` → PDF; còn lại → `INVOICE_UNSUPPORTED_FILE`.
+- **Chống XXE / entity expansion**: cấu hình `processEntities: false`; từ chối mọi file có `<!DOCTYPE` hoặc `<!ENTITY` (`INVOICE_XML_MALFORMED`). HĐĐT hợp lệ không dùng DTD.
+- Chạy `XMLValidator.validate()` trước khi parse để phát hiện XML cắt cụt (fast-xml-parser mặc định khoan dung với XML hỏng).
+- Giải mã UTF-8; bỏ tiền tố namespace (`removeNSPrefix: true`) để `<inv:HDon>` vẫn được nhận diện; bỏ qua attribute.
+- Chuỗi lấy từ XML bị cắt theo độ dài cột trước khi lưu; số dòng hàng tối đa 1.000/hóa đơn.
+- Adapter không ném lỗi thô: mọi lỗi được chuyển thành `InvoiceParseError { code, message }` để service ghi vào kết quả từng file.
+
+### 4.7. Điều kiện bắt buộc (lỗi `INVALID`, không lưu)
 
 - Thiếu số hóa đơn, ngày lập, MST người bán, hoặc tổng thanh toán.
 - MST người bán không đúng dạng `^\d{10}(-?\d{3})?$` (10 số hoặc 13 số của đơn vị phụ thuộc; chuẩn hóa bỏ dấu gạch khi lưu).
@@ -336,7 +345,7 @@ Tất cả endpoint nằm dưới `/api/invoices`, yêu cầu JWT (guard toàn c
 
 ### 5.1. `POST /api/invoices/upload`
 
-Giới hạn: 50 file/lô, 2 MB/file, lưu bộ nhớ (`memoryStorage`), không ghi đĩa.
+Giới hạn: 50 file/lô, 2 MB/file, lưu bộ nhớ (`memoryStorage`, tối đa 100 MB/request), không ghi đĩa. Dùng cấu hình Multer riêng của context `invoice`, **không** sửa hay import `modules/upload` (giới hạn 5 file, chỉ ảnh/PDF, ghi đĩa — khác mục đích và import chéo context bị cấm). Endpoint có `@Throttle` riêng (10 request/phút). File được xử lý **tuần tự** trong một request để hai bản sao trong cùng lô cho kết quả xác định (`CREATED` rồi `DUPLICATE`).
 
 ```json
 {
@@ -368,11 +377,13 @@ Giới hạn: 50 file/lô, 2 MB/file, lưu bộ nhớ (`memoryStorage`), không 
   "subtotalAmount": "125000000.00", "vatAmount": "10500000.00", "totalAmount": "135500000.00" }
 ```
 
+`/export` giới hạn 5.000 hóa đơn mỗi lần; vượt quá trả `422 INVOICE_EXPORT_TOO_LARGE` và yêu cầu thu hẹp bộ lọc. Các route tĩnh `stats`, `export`, `upload` khai báo **trước** `:id`; `:id` dùng `ParseUUIDPipe`.
+
 Số tiền trả về dạng **chuỗi thập phân** trên mọi endpoint để tránh sai số `number` của JavaScript.
 
 ### 5.4. Mã lỗi mới (`error-code.ts`)
 
-`INVOICE_NOT_FOUND` (404), `INVOICE_DUPLICATE`, `INVOICE_XML_MALFORMED`, `INVOICE_UNKNOWN_FORMAT`, `INVOICE_MISSING_FIELD`, `INVOICE_INVALID_FIELD`, `INVOICE_PDF_NOT_SUPPORTED`, `INVOICE_UNSUPPORTED_FILE`, `INVOICE_BATCH_EMPTY` (422), `INVOICE_BATCH_TOO_LARGE` (422).
+`INVOICE_NOT_FOUND` (404), `INVOICE_DUPLICATE`, `INVOICE_XML_MALFORMED`, `INVOICE_UNKNOWN_FORMAT`, `INVOICE_MISSING_FIELD`, `INVOICE_INVALID_FIELD`, `INVOICE_PDF_NOT_SUPPORTED`, `INVOICE_UNSUPPORTED_FILE`, `INVOICE_BATCH_EMPTY` (422), `INVOICE_BATCH_TOO_LARGE` (422), `INVOICE_EXPORT_TOO_LARGE` (422).
 
 ## 6. UI/UX Specs (`apps/admin-shadcn`)
 
@@ -404,6 +415,7 @@ Kiểu dữ liệu lấy từ `@workspace/api-types` (sinh lại sau khi API ch�
 | `tct-flat-legacy.xml` | Dạng phẳng không có `DLHDon` |
 | `vnpt-valid.xml`, `misa-valid.xml`, `fpt-valid.xml`, `tct-generic-valid.xml` | Chuyển thể từ `testdata/` của repo tham chiếu |
 | `malformed.xml` | XML cắt cụt |
+| `xxe-doctype.xml` | Có `<!DOCTYPE>` + entity ngoài — phải bị từ chối |
 | `unknown-format.xml` | XML hợp lệ nhưng không phải hóa đơn |
 | `missing-seller-tax-code.xml` | Thiếu trường bắt buộc |
 
@@ -413,9 +425,64 @@ Kiểu dữ liệu lấy từ `@workspace/api-types` (sinh lại sau khi API ch�
 | --- | --- |
 | `decimal.spec.ts` | parse chuỗi, cộng/nhân, làm tròn, từ chối chuỗi không phải số |
 | `invoice-reconciliation.spec.ts` | khớp; lệch tổng; lệch tổng dòng; trong dung sai làm tròn; hóa đơn bán hàng không thuế; dòng chiết khấu; cảnh báo cấp dòng |
-| `invoice-xml-parser.spec.ts` | từng fixture hợp lệ → đúng trường; giữ số 0 đầu; một dòng hàng vẫn là mảng; `TSuat` không phải số; malformed; unknown; thiếu trường; người bán tên chứa "FPT" không bị nhận nhầm |
-| `invoice.service.spec.ts` (mock port) | **XML hợp lệ** → `CREATED`/`VALID`; **XML lệch tiền** → `CREATED`/`MISMATCH` kèm issues; **XML trùng lặp** (repo trả `null`) → `DUPLICATE`, không ném lỗi; trùng trong cùng một lô; PDF → `UNSUPPORTED`; file lỗi không chặn file khác; lô rỗng / > 50 file → lỗi; chi tiết của người khác → 404 |
+| `invoice-xml-parser.spec.ts` | từng fixture hợp lệ → đúng trường; giữ số 0 đầu; một dòng hàng vẫn là mảng; `TSuat` không phải số; malformed; DOCTYPE/XXE bị từ chối; BOM và namespace prefix; unknown; thiếu trường; người bán tên chứa "FPT" không bị nhận nhầm |
+| `invoice.service.spec.ts` (mock port) | **XML hợp lệ** → `CREATED`/`VALID`; **XML lệch tiền** → `CREATED`/`MISMATCH` kèm issues; **XML trùng lặp** (repo trả `null`) → `DUPLICATE`, không ném lỗi; trùng trong cùng một lô; PDF → `UNSUPPORTED`; file giả đuôi `.xml` nhưng nội dung nhị phân → `UNSUPPORTED`; file lỗi không chặn file khác; lô rỗng / > 50 file → lỗi; chi tiết của người khác → 404 |
 
 ### 7.3. Cổng chất lượng
 
 `pnpm build`, `pnpm lint`, `pnpm typecheck`, `pnpm --filter api test`, `pnpm turbo deps` đều phải sạch.
+
+## 8. Đánh giá & Phê duyệt Thiết kế
+
+Review ở vai trò Senior Staff Engineer / Architect, đối chiếu với `.claude/rules/api.md`, `.dependency-cruiser.mjs`, `docs/api-conventions.md` và mã Go tham chiếu. Bản nháp Phase 1 đã qua **hai vòng**; các thay đổi của vòng 1 đã được gộp ngược vào mục 2–7.
+
+### 8.1. Tuân thủ modular DDD
+
+| Tiêu chí | Kết quả | Ghi chú |
+| --- | --- | --- |
+| Domain thuần, không thư viện ngoài | Đạt | `fast-xml-parser`, `exceljs` nằm sau port ở `infrastructure/adapters/`; số thập phân tự cài bằng BigInt thay vì kéo thư viện vào `domain/` |
+| Service chỉ phụ thuộc port | Đạt | 3 port: repository, XML parser, Excel exporter; không inject `PrismaService` |
+| Không import chéo context | Đạt sau sửa | Bản nháp định tái dùng `multerConfig` của `modules/upload` → vi phạm `no-cross-module`. Đã đổi sang cấu hình riêng (5.1) |
+| Presentation không chạm DB | Đạt | DTO `fromRecord()`; kiểu Prisma không lọt ra controller |
+| Chọn stage phù hợp | Đạt | Stage 3 + hàm domain thuần; không dựng aggregate/domain event vì hóa đơn đã nhập là bất biến — tránh over-engineering theo nguyên tắc MVP-first |
+| Quy ước API | Đạt | `/api` prefix, problem details, `OffsetListResponseDto`, Swagger đầy đủ để sinh `api-types` |
+
+### 8.2. Các vấn đề phát hiện và cách xử lý
+
+| # | Vấn đề | Mức | Xử lý |
+| --- | --- | --- | --- |
+| 1 | **XXE / billion-laughs** qua XML người dùng tải lên | Nghiêm trọng | Thêm 4.6: tắt entity, từ chối DOCTYPE; fixture + test riêng |
+| 2 | Tin `mimetype`/đuôi file từ client | Cao | Nhận diện theo magic bytes (4.6) |
+| 3 | fast-xml-parser không báo lỗi với XML cắt cụt → lưu dữ liệu thiếu | Cao | Bắt buộc `XMLValidator.validate()` trước khi parse |
+| 4 | Import chéo context `upload` | Cao | Cấu hình Multer riêng (5.1) |
+| 5 | 50 file × 10 MB trong RAM có thể làm sập tiến trình | Trung bình | Giảm còn 2 MB/file (HĐĐT thực tế vài chục KB), throttle riêng |
+| 6 | `/export` không giới hạn → truy vấn và file không chặn trên | Trung bình | Trần 5.000 hóa đơn (5.3) |
+| 7 | Route `:id` nuốt `stats`/`export` | Trung bình | Thứ tự khai báo + `ParseUUIDPipe` |
+| 8 | Xử lý song song trong lô cho kết quả trùng lặp không xác định | Thấp | Xử lý tuần tự |
+| 9 | BOM / namespace prefix làm trượt nhận diện | Thấp | 4.6 + test |
+
+### 8.3. Bảo mật dữ liệu thuế
+
+- **Cô lập theo chủ sở hữu**: mọi truy vấn có `ownerId`; truy cập hóa đơn của người khác trả `404` (không phải `403`) để không lộ sự tồn tại.
+- **Tối thiểu hóa dữ liệu**: không lưu XML gốc, không ghi file ra đĩa, không log nội dung hóa đơn hay MST — chỉ log tên file, mã lỗi, `request_id`.
+- **Thông báo lỗi** không phản chiếu nội dung XML thô (tránh lộ dữ liệu qua log/Toast và tránh injection vào UI).
+- **Excel injection**: ô văn bản bắt đầu bằng `=`, `+`, `-`, `@` được thêm tiền tố `'` khi xuất.
+- Xóa hóa đơn là xóa cứng kèm cascade dòng hàng; mã hóa at-rest giao cho tầng hạ tầng PostgreSQL.
+
+### 8.4. Rủi ro còn mở (được chấp nhận cho MVP)
+
+1. **Unique index toàn cục vs. đa người dùng.** Yêu cầu chỉ định khóa `[sellerTaxCode, invoiceTemplate, invoiceSeries, invoiceNumber]` không chứa `ownerId`. Hệ quả: nếu hai tài khoản khác nhau cùng tải một hóa đơn, tài khoản thứ hai nhận `DUPLICATE`, và điều đó gián tiếp cho biết hóa đơn đã có trong hệ thống. Với MVP một hộ – một tài khoản thì chấp nhận được; **trước khi mở đa khách hàng phải thêm `ownerId` vào đầu index**. Giữ nguyên theo yêu cầu, cần chủ sản phẩm xác nhận.
+2. **Chưa xác thực chữ ký số**: hệ thống không khẳng định hóa đơn là thật, chỉ khẳng định số liệu nhất quán. UI không được dùng từ "hợp pháp"; badge ghi "Hợp lệ" theo nghĩa đối soát số học.
+3. **PDF chưa được trích xuất** (1.3).
+4. **Định dạng VNPT/MISA/FPT lấy từ fixture của repo tham chiếu**, không phải từ file thật của nhà cung cấp; trong thực tế các nhà cung cấp này xuất chuẩn `HDon` 1450. Adapter chuẩn 1450 là đường chính, 4 adapter còn lại là tương thích.
+5. **Hóa đơn điều chỉnh/thay thế** được lưu như hóa đơn độc lập, chưa liên kết với hóa đơn gốc; hóa đơn điều chỉnh giảm có số âm vẫn đối soát đúng vì quy tắc dùng phép cộng có dấu.
+6. **Xử lý đồng bộ** trong request: đủ cho 50 file nhỏ; nếu thêm OCR cần chuyển sang hàng đợi (mẫu `Job` + 202 của context `order`).
+
+### 8.5. Kết luận
+
+| Vòng | Kết quả |
+| --- | --- |
+| 1 | **Chưa duyệt** — vấn đề #1–#4 chặn triển khai |
+| 2 | **Phê duyệt có điều kiện** — #1–#9 đã đưa vào đặc tả; rủi ro 8.4 được ghi nhận, riêng 8.4.1 cần chủ sản phẩm xác nhận trước khi mở đa khách hàng |
+
+Thiết kế được phép chuyển sang Phase 3.
