@@ -20,6 +20,13 @@ export const PROVIDER_LABELS: Record<InvoiceProvider, string> = {
   FPT: 'FPT',
 }
 
+export const ITEM_KIND_LABELS: Record<InvoiceDetail['items'][number]['kind'], string> = {
+  GOODS: 'Hàng hóa, dịch vụ',
+  PROMOTION: 'Khuyến mại',
+  DISCOUNT: 'Chiết khấu',
+  NOTE: 'Ghi chú',
+}
+
 export const OUTCOME_LABELS: Record<UploadFileResult['outcome'], string> = {
   CREATED: 'Đã lưu',
   DUPLICATE: 'Trùng lặp',

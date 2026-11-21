@@ -82,6 +82,9 @@ export function InvoicesPage() {
   const total = data?.total ?? 0
   const totalPages = Math.ceil(total / PAGE_SIZE)
 
+  // Deleting the last row of the last page would otherwise leave an empty page with no pager
+  if (data && totalPages > 0 && page > totalPages) setPage(totalPages)
+
   function resetPage<T>(setter: (value: T) => void) {
     return (value: T) => {
       setter(value)

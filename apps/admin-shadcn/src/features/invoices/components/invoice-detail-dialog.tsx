@@ -1,5 +1,6 @@
 'use client'
 
+import { Badge } from '@workspace/ui/components/badge'
 import { Button } from '@workspace/ui/components/button'
 import {
   Dialog,
@@ -24,7 +25,7 @@ import { toast } from 'sonner'
 import { InvoiceStatusBadge } from '@/features/invoices/components/invoice-status-badge'
 import { useInvalidateInvoices } from '@/features/invoices/hooks/use-invoice-upload'
 import { formatDate, formatMoney, formatNumber } from '@/features/invoices/lib/format'
-import { PROVIDER_LABELS } from '@/features/invoices/lib/labels'
+import { ITEM_KIND_LABELS, PROVIDER_LABELS } from '@/features/invoices/lib/labels'
 import { $api } from '@/lib/api'
 
 import type { InvoiceDetail } from '@/features/invoices/lib/labels'
@@ -100,7 +101,14 @@ function InvoiceBody({ invoice }: { invoice: InvoiceDetail }) {
             {invoice.items.map((item) => (
               <TableRow key={item.id}>
                 <TableCell>{item.lineNumber}</TableCell>
-                <TableCell className="whitespace-normal">{item.name}</TableCell>
+                <TableCell className="whitespace-normal">
+                  {item.name}
+                  {item.kind !== 'GOODS' && (
+                    <Badge variant="secondary" className="ms-2">
+                      {ITEM_KIND_LABELS[item.kind]}
+                    </Badge>
+                  )}
+                </TableCell>
                 <TableCell>{item.unit ?? '—'}</TableCell>
                 <TableCell className="text-right tabular-nums">
                   {formatNumber(item.quantity)}

@@ -115,6 +115,7 @@ export const invoiceHandlers = [
       items: [
         {
           id: '33333333-3333-4333-8333-333333333333',
+          kind: 'GOODS',
           lineNumber: 1,
           code: 'GAO-ST25',
           name: 'Gạo ST25 túi 5kg',
