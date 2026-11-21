@@ -1,4 +1,4 @@
-export { PrismaClient, Prisma, UserRole, LoginStatus } from '@prisma/client'
+export { PrismaClient, Prisma, UserRole, LoginStatus, InvoiceStatus, InvoiceProvider } from '@prisma/client'
 export type {
   User,
   Account,
@@ -10,6 +10,8 @@ export type {
   Order,
   Job,
   AuditLog,
+  Invoice,
+  InvoiceItem,
 } from '@prisma/client'
 
 export { createPrismaClient } from './client'
@@ -36,4 +38,8 @@ export type {
   JobDatabase,
   InsertJobDatabase,
   InsertAuditLog,
+  InvoiceDatabase,
+  InsertInvoiceDatabase,
+  InvoiceItemDatabase,
+  InsertInvoiceItemDatabase,
 } from './types'

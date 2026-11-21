@@ -22,26 +22,27 @@ enum LoginStatus {
 }
 
 model User {
-  id              String     @id
+  id              String    @id
   name            String
   email           String
-  emailVerified   Boolean    @default(false) @map("email_verified")
+  emailVerified   Boolean   @default(false) @map("email_verified")
   image           String?
-  role            UserRole   @default(USER)
-  banned          Boolean?   @default(false)
-  banReason       String?    @map("ban_reason")
-  banExpires      DateTime?  @map("ban_expires") @db.Timestamp(6)
-  username        String     @default("")
-  displayUsername String     @default("") @map("display_username")
-  displayName     String?    @map("display_name") @db.VarChar(50)
-  bio             String?    @db.VarChar(500)
-  preferences     Json       @default("{}")
-  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt       DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  role            UserRole  @default(USER)
+  banned          Boolean?  @default(false)
+  banReason       String?   @map("ban_reason")
+  banExpires      DateTime? @map("ban_expires") @db.Timestamp(6)
+  username        String    @default("")
+  displayUsername String    @default("") @map("display_username")
+  displayName     String?   @map("display_name") @db.VarChar(50)
+  bio             String?   @db.VarChar(500)
+  preferences     Json      @default("{}")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   accounts  Account[]
   sessions  Session[]
   loginLogs LoginLog[]
+  invoices  Invoice[]
 
   @@unique([email], map: "users_email_idx")
   @@unique([username], map: "users_username_idx")
@@ -130,19 +131,19 @@ model Todo {
 }
 
 model Article {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title        String
   content      String
-  slug         String    @unique
-  status       String    @default("draft")
-  tags         Json      @default("[]")
-  category     String    @default("other")
-  author       String    @default("")
-  viewCount    Int       @default(0) @map("view_count")
-  isPinned     Boolean   @default(false) @map("is_pinned")
-  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
-  publishedAt  DateTime? @map("published_at") @db.Timestamptz(6)
+  slug         String                  @unique
+  status       String                  @default("draft")
+  tags         Json                    @default("[]")
+  category     String                  @default("other")
+  author       String                  @default("")
+  viewCount    Int                     @default(0) @map("view_count")
+  isPinned     Boolean                 @default(false) @map("is_pinned")
+  createdAt    DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  publishedAt  DateTime?               @map("published_at") @db.Timestamptz(6)
   /// Full-text search vector; maintained via raw SQL on write
   searchVector Unsupported("tsvector") @default(dbgenerated("''::tsvector")) @map("search_vector")
 
@@ -205,4 +206,86 @@ model AuditLog {
   @@index([occurredAt], map: "audit_logs_occurred_at_idx")
   @@index([createdAt], map: "audit_logs_created_at_idx")
   @@map("audit_logs")
+}
+
+enum InvoiceStatus {
+  VALID // amounts reconcile
+  MISMATCH // amounts differ; still stored so the user can review it
+
+  @@map("invoice_status")
+}
+
+enum InvoiceProvider {
+  TCT
+  VNPT
+  MISA
+  VIETTEL
+  FPT
+
+  @@map("invoice_provider")
+}
+
+enum InvoiceItemKind {
+  GOODS
+  PROMOTION
+  DISCOUNT
+  NOTE
+
+  @@map("invoice_item_kind")
+}
+
+model Invoice {
+  id               String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId          String          @map("owner_id")
+  provider         InvoiceProvider
+  status           InvoiceStatus
+  invoiceTemplate  String          @map("invoice_template") @db.VarChar(20) // KHMSHDon
+  invoiceSeries    String          @map("invoice_series") @db.VarChar(20) // KHHDon
+  invoiceNumber    String          @map("invoice_number") @db.VarChar(20) // SHDon
+  issuedAt         DateTime        @map("issued_at") @db.Date // NLap
+  currency         String          @default("VND") @db.VarChar(3)
+  exchangeRate     Decimal         @default(1) @map("exchange_rate") @db.Decimal(18, 6)
+  sellerTaxCode    String          @map("seller_tax_code") @db.VarChar(14)
+  sellerName       String          @map("seller_name")
+  sellerAddress    String?         @map("seller_address")
+  buyerTaxCode     String?         @map("buyer_tax_code") @db.VarChar(14)
+  buyerName        String?         @map("buyer_name")
+  buyerAddress     String?         @map("buyer_address")
+  subtotalAmount   Decimal         @map("subtotal_amount") @db.Decimal(18, 2) // TgTCThue
+  vatAmount        Decimal         @map("vat_amount") @db.Decimal(18, 2) // TgTThue
+  totalAmount      Decimal         @map("total_amount") @db.Decimal(18, 2) // TgTTTBSo
+  validationIssues Json            @default("[]") @map("validation_issues")
+  sourceFileName   String          @map("source_file_name")
+  sourceFileHash   String          @map("source_file_hash") @db.Char(64) // SHA-256
+  createdAt        DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  owner User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  items InvoiceItem[]
+
+  @@unique([sellerTaxCode, invoiceTemplate, invoiceSeries, invoiceNumber], map: "invoices_identity_idx")
+  @@index([ownerId, issuedAt], map: "invoices_owner_issued_at_idx")
+  @@index([ownerId, status], map: "invoices_owner_status_idx")
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  invoiceId      String          @map("invoice_id") @db.Uuid
+  kind           InvoiceItemKind @default(GOODS)
+  lineNumber     Int             @map("line_number") // STT
+  code           String?         @db.VarChar(50) // MHHDVu
+  name           String // THHDVu
+  unit           String?         @db.VarChar(50) // DVTinh
+  quantity       Decimal?        @db.Decimal(18, 6) // SLuong
+  unitPrice      Decimal?        @map("unit_price") @db.Decimal(18, 6) // DGia
+  discountAmount Decimal         @default(0) @map("discount_amount") @db.Decimal(18, 2) // STCKhau
+  amount         Decimal         @db.Decimal(18, 2) // ThTien
+  vatRate        String?         @map("vat_rate") @db.VarChar(10) // TSuat: "10%", "KCT", "KKKNT"…
+  vatAmount      Decimal?        @map("vat_amount") @db.Decimal(18, 2) // TThue
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId], map: "invoice_items_invoice_id_idx")
+  @@map("invoice_items")
 }

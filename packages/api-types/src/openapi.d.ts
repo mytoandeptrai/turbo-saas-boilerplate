@@ -750,6 +750,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/invoices/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload up to 50 e-invoice XML files (max 2MB each) */
+        post: operations["InvoiceController_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/invoices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List invoices (offset pagination with filters) */
+        get: operations["InvoiceController_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/invoices/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Invoice totals for the summary cards */
+        get: operations["InvoiceController_stats"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/invoices/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export filtered invoices to Excel (max 5000 invoices) */
+        get: operations["InvoiceController_export"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/invoices/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get invoice details with line items */
+        get: operations["InvoiceController_findOne"];
+        put?: never;
+        post?: never;
+        /** Delete an invoice */
+        delete: operations["InvoiceController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1398,6 +1484,42 @@ export interface components {
         ArticleCategoryStatsDto: {
             categories: components["schemas"]["ArticleCategoryStatItemDto"][];
         };
+        InvoiceUploadFileResultDto: {
+            /** @example hoa-don-00000123.xml */
+            fileName: string;
+            /** @enum {string} */
+            outcome: "CREATED" | "DUPLICATE" | "INVALID" | "UNSUPPORTED";
+            /**
+             * Format: uuid
+             * @description Present when outcome is CREATED
+             */
+            invoiceId?: string;
+            /** @example 00000123 */
+            invoiceNumber?: string;
+            /**
+             * @description Present when outcome is CREATED
+             * @enum {string}
+             */
+            status?: "VALID" | "MISMATCH";
+            /**
+             * @description Error code when not created
+             * @example INVOICE_DUPLICATE
+             */
+            code?: string;
+            /** @description Human-readable reason (Vietnamese) */
+            message?: string;
+        };
+        InvoiceUploadResponseDto: {
+            /** @example 3 */
+            total: number;
+            /** @example 1 */
+            created: number;
+            /** @example 1 */
+            duplicated: number;
+            /** @example 1 */
+            failed: number;
+            results: components["schemas"]["InvoiceUploadFileResultDto"][];
+        };
         FieldError: {
             /**
              * @description Field name (field-level validation error when present)
@@ -1497,6 +1619,228 @@ export interface components {
              *     ]
              */
             errors?: components["schemas"]["FieldError"][];
+        };
+        InvoiceValidationIssueDto: {
+            /** @enum {string} */
+            code: "TOTAL_MISMATCH" | "SUBTOTAL_MISMATCH" | "VAT_MISMATCH" | "LINE_AMOUNT_MISMATCH";
+            /** @enum {string} */
+            severity: "error" | "warning";
+            /** @description Human-readable explanation (Vietnamese) */
+            message: string;
+        };
+        InvoiceResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            provider: "TCT" | "VNPT" | "MISA" | "VIETTEL" | "FPT";
+            /** @enum {string} */
+            status: "VALID" | "MISMATCH";
+            /**
+             * @description Template code (KHMSHDon)
+             * @example 1
+             */
+            invoiceTemplate: string;
+            /**
+             * @description Series (KHHDon)
+             * @example C26TAA
+             */
+            invoiceSeries: string;
+            /**
+             * @description Invoice number (SHDon)
+             * @example 00000123
+             */
+            invoiceNumber: string;
+            /**
+             * @description Issue date (YYYY-MM-DD)
+             * @example 2026-03-12
+             */
+            issuedAt: string;
+            /** @example VND */
+            currency: string;
+            /** @example 0312345678 */
+            sellerTaxCode: string;
+            /** @example CÔNG TY TNHH THỰC PHẨM VIỆT */
+            sellerName: string;
+            sellerAddress: string | null;
+            buyerTaxCode: string | null;
+            buyerName: string | null;
+            buyerAddress: string | null;
+            /**
+             * @description Amount before tax, decimal string
+             * @example 5100000.00
+             */
+            subtotalAmount: string;
+            /**
+             * @description VAT amount, decimal string
+             * @example 300000.00
+             */
+            vatAmount: string;
+            /**
+             * @description Total payable, decimal string
+             * @example 5400000.00
+             */
+            totalAmount: string;
+            validationIssues: components["schemas"]["InvoiceValidationIssueDto"][];
+            /** @example hoa-don-00000123.xml */
+            sourceFileName: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        InvoiceListResponseDto: {
+            /**
+             * @description Object type identifier
+             * @example list
+             * @enum {string}
+             */
+            object: "list";
+            /** @description Actual data array */
+            data: components["schemas"]["InvoiceResponseDto"][];
+            /**
+             * @description Current page number (1-based)
+             * @example 1
+             */
+            page: number;
+            /**
+             * @description Number of items per page
+             * @example 20
+             */
+            pageSize: number;
+            /**
+             * @description Total number of items
+             * @example 100
+             */
+            total: number;
+            /**
+             * @description Whether there are more items
+             * @example true
+             */
+            hasMore: boolean;
+        };
+        InvoiceStatsResponseDto: {
+            /** @example 42 */
+            totalInvoices: number;
+            /** @example 40 */
+            validCount: number;
+            /** @example 2 */
+            mismatchCount: number;
+            /**
+             * @description Decimal string
+             * @example 125000000.00
+             */
+            subtotalAmount: string;
+            /**
+             * @description Decimal string
+             * @example 10500000.00
+             */
+            vatAmount: string;
+            /**
+             * @description Decimal string
+             * @example 135500000.00
+             */
+            totalAmount: string;
+        };
+        InvoiceItemResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /**
+             * @description Line nature: goods/service, promotion, trade discount or note
+             * @enum {string}
+             */
+            kind: "GOODS" | "PROMOTION" | "DISCOUNT" | "NOTE";
+            /** @example 1 */
+            lineNumber: number;
+            /** @example GAO-ST25 */
+            code: string | null;
+            /** @example Gạo ST25 túi 5kg */
+            name: string;
+            /** @example Túi */
+            unit: string | null;
+            /**
+             * @description Decimal string
+             * @example 20
+             */
+            quantity: string | null;
+            /**
+             * @description Decimal string
+             * @example 180000
+             */
+            unitPrice: string | null;
+            /**
+             * @description Decimal string
+             * @example 0.00
+             */
+            discountAmount: string;
+            /**
+             * @description Line amount before tax, decimal string
+             * @example 3600000.00
+             */
+            amount: string;
+            /** @example 5% */
+            vatRate: string | null;
+            /**
+             * @description Decimal string; null when the invoice has no per-line tax
+             * @example 180000.00
+             */
+            vatAmount: string | null;
+        };
+        InvoiceDetailResponseDto: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            provider: "TCT" | "VNPT" | "MISA" | "VIETTEL" | "FPT";
+            /** @enum {string} */
+            status: "VALID" | "MISMATCH";
+            /**
+             * @description Template code (KHMSHDon)
+             * @example 1
+             */
+            invoiceTemplate: string;
+            /**
+             * @description Series (KHHDon)
+             * @example C26TAA
+             */
+            invoiceSeries: string;
+            /**
+             * @description Invoice number (SHDon)
+             * @example 00000123
+             */
+            invoiceNumber: string;
+            /**
+             * @description Issue date (YYYY-MM-DD)
+             * @example 2026-03-12
+             */
+            issuedAt: string;
+            /** @example VND */
+            currency: string;
+            /** @example 0312345678 */
+            sellerTaxCode: string;
+            /** @example CÔNG TY TNHH THỰC PHẨM VIỆT */
+            sellerName: string;
+            sellerAddress: string | null;
+            buyerTaxCode: string | null;
+            buyerName: string | null;
+            buyerAddress: string | null;
+            /**
+             * @description Amount before tax, decimal string
+             * @example 5100000.00
+             */
+            subtotalAmount: string;
+            /**
+             * @description VAT amount, decimal string
+             * @example 300000.00
+             */
+            vatAmount: string;
+            /**
+             * @description Total payable, decimal string
+             * @example 5400000.00
+             */
+            totalAmount: string;
+            validationIssues: components["schemas"]["InvoiceValidationIssueDto"][];
+            /** @example hoa-don-00000123.xml */
+            sourceFileName: string;
+            /** Format: date-time */
+            createdAt: string;
+            items: components["schemas"]["InvoiceItemResponseDto"][];
         };
     };
     responses: never;
@@ -3471,6 +3815,267 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ArticleCategoryStatsDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    InvoiceController_upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    files: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description Every file was stored */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceUploadResponseDto"];
+                };
+            };
+            /** @description Some files were duplicated, invalid or unsupported (per-file details included) */
+            207: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceUploadResponseDto"];
+                };
+            };
+            /** @description Empty batch or more than 50 files */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    InvoiceController_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                pageSize?: number;
+                /** @description Search by invoice number, seller name or seller tax code */
+                q?: string;
+                /** @description Reconciliation status */
+                status?: "VALID" | "MISMATCH";
+                /** @description E-invoice provider */
+                provider?: "TCT" | "VNPT" | "MISA" | "VIETTEL" | "FPT";
+                /** @description Issue date from (inclusive) */
+                issuedFrom?: string;
+                /** @description Issue date to (inclusive) */
+                issuedTo?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceListResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    InvoiceController_stats: {
+        parameters: {
+            query?: {
+                /** @description Search by invoice number, seller name or seller tax code */
+                q?: string;
+                /** @description Reconciliation status */
+                status?: "VALID" | "MISMATCH";
+                /** @description E-invoice provider */
+                provider?: "TCT" | "VNPT" | "MISA" | "VIETTEL" | "FPT";
+                /** @description Issue date from (inclusive) */
+                issuedFrom?: string;
+                /** @description Issue date to (inclusive) */
+                issuedTo?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceStatsResponseDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    InvoiceController_export: {
+        parameters: {
+            query?: {
+                /** @description Search by invoice number, seller name or seller tax code */
+                q?: string;
+                /** @description Reconciliation status */
+                status?: "VALID" | "MISMATCH";
+                /** @description E-invoice provider */
+                provider?: "TCT" | "VNPT" | "MISA" | "VIETTEL" | "FPT";
+                /** @description Issue date from (inclusive) */
+                issuedFrom?: string;
+                /** @description Issue date to (inclusive) */
+                issuedTo?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Excel workbook */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": string;
+                };
+            };
+            /** @description More than 5000 invoices match the filter */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    InvoiceController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Invoice ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceDetailResponseDto"];
+                };
+            };
+            /** @description Invoice not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+            /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    InvoiceController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Invoice ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Invoice deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invoice not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
             /** @description Error response (includes 400/401/403/404/422/429/500, etc.) */

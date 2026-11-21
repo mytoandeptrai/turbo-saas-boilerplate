@@ -3,6 +3,7 @@
 import {
   BarChart2Icon,
   FileTextIcon,
+  ReceiptTextIcon,
   UsersIcon,
   ShieldCheckIcon,
   ListChecksIcon,
@@ -10,8 +11,8 @@ import {
   SettingsIcon,
 } from 'lucide-react'
 
-import type { LucideIcon } from 'lucide-react'
 import type { RoleType } from '@/lib/rbac'
+import type { LucideIcon } from 'lucide-react'
 
 export const appPaths = {
   home: {
@@ -27,6 +28,10 @@ export const appPaths = {
   articles: {
     href: '/articles',
     label: 'Articles',
+  },
+  invoices: {
+    href: '/invoices',
+    label: 'Hóa đơn',
   },
   auth: {
     register: {
@@ -73,6 +78,11 @@ export type NavItem = {
 }
 
 export const managementNavItems: NavItem[] = [
+  {
+    title: appPaths.invoices.label,
+    url: appPaths.invoices.href,
+    icon: ReceiptTextIcon,
+  },
   {
     title: 'Dashboard',
     url: appPaths.dashboards.analytics.href,

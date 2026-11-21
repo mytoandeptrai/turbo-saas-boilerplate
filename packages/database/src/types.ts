@@ -2,6 +2,8 @@ import type {
   Account,
   Article,
   AuditLog,
+  Invoice,
+  InvoiceItem,
   Job,
   LoginLog,
   Order,
@@ -57,3 +59,9 @@ export type InsertJobDatabase = Prisma.JobUncheckedCreateInput
 
 export type { AuditLog }
 export type InsertAuditLog = Prisma.AuditLogUncheckedCreateInput
+
+export type InvoiceDatabase = Invoice
+export type InsertInvoiceDatabase = Prisma.InvoiceUncheckedCreateInput
+
+export type InvoiceItemDatabase = InvoiceItem
+export type InsertInvoiceItemDatabase = Prisma.InvoiceItemUncheckedCreateInput
