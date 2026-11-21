@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { Workbook } from 'exceljs'
+import ExcelJS from 'exceljs'
 
 import type { InvoiceExcelExporter } from '@/modules/invoice/application/ports/invoice-excel-exporter.port'
 import type { InvoiceWithItems } from '@/modules/invoice/domain/invoice.types'
@@ -24,7 +24,7 @@ function styleHeader(sheet: Worksheet): void {
 @Injectable()
 export class ExcelJsInvoiceExporter implements InvoiceExcelExporter {
   async export(invoices: InvoiceWithItems[]): Promise<Buffer> {
-    const workbook = new Workbook()
+    const workbook = new ExcelJS.Workbook()
 
     const invoiceSheet = workbook.addWorksheet('Hóa đơn')
     invoiceSheet.columns = [
