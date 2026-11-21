@@ -27,6 +27,7 @@ import { RolesGuard } from '@/modules/auth/presentation/guards/roles.guard'
 import { CacheModule } from '@/modules/cache/cache.module'
 import { HealthModule } from '@/modules/health/health.module'
 import { IdentityModule } from '@/modules/identity/identity.module'
+import { InvoiceModule } from '@/modules/invoice/invoice.module'
 import { OrderModule } from '@/modules/order/order.module'
 import { ScheduledTasksModule } from '@/modules/scheduled-tasks/scheduled-tasks.module'
 import { TodoModule } from '@/modules/todo/todo.module'
@@ -93,6 +94,7 @@ import type { NestModule, MiddlewareConsumer } from '@nestjs/common'
     ScheduledTasksModule, // Scheduled tasks (cron, interval, timeout examples)
     UploadModule, // File upload (Multer + local storage)
     AnalyticsModule, // Analytics dashboard data endpoints
+    InvoiceModule, // E-invoice import, reconciliation and export (HoaDon Nhanh)
   ],
   providers: [
     // Global guards (order matters: JWT first, then roles, then throttler)

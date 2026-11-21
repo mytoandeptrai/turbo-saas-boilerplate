@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inv:HDon xmlns:inv="http://kekhaithue.gdt.gov.vn/TKhaiThue">
+  <inv:DLHDon>
+    <inv:TTChung>
+      <inv:THDon>Hóa đơn bán hàng</inv:THDon>
+      <inv:KHMSHDon>2</inv:KHMSHDon>
+      <inv:KHHDon>C26THA</inv:KHHDon>
+      <inv:SHDon>00000045</inv:SHDon>
+      <inv:NLap>2026-04-02</inv:NLap>
+    </inv:TTChung>
+    <inv:NDHDon>
+      <inv:NBan>
+        <inv:Ten>HỘ KINH DOANH NGUYỄN VĂN AN</inv:Ten>
+        <inv:MST>8098765432</inv:MST>
+        <inv:DChi>Chợ Bến Thành, Quận 1, TP. Hồ Chí Minh</inv:DChi>
+      </inv:NBan>
+      <inv:NMua>
+        <inv:Ten>HỘ KINH DOANH TẠP HÓA CÔ BA</inv:Ten>
+      </inv:NMua>
+      <inv:DSHHDVu>
+        <inv:HHDVu>
+          <inv:THHDVu>Trứng gà ta</inv:THHDVu>
+          <inv:DVTinh>Chục</inv:DVTinh>
+          <inv:SLuong>30</inv:SLuong>
+          <inv:DGia>35000</inv:DGia>
+          <inv:ThTien>1050000</inv:ThTien>
+        </inv:HHDVu>
+      </inv:DSHHDVu>
+      <inv:TToan>
+        <inv:TgTTTBSo>1050000</inv:TgTTTBSo>
+      </inv:TToan>
+    </inv:NDHDon>
+  </inv:DLHDon>
+</inv:HDon>

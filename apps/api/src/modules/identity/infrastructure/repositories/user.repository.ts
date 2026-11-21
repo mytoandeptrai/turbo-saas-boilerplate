@@ -2,7 +2,8 @@ import { randomUUID } from 'node:crypto'
 
 import { Injectable } from '@nestjs/common'
 import * as bcrypt from 'bcrypt'
-import { Prisma, type UserDatabase } from '@workspace/database'
+import { Prisma } from '@workspace/database';
+import type { UserDatabase } from '@workspace/database';
 
 import { PrismaService } from '@/app/database/prisma.service'
 
