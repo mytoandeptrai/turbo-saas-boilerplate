@@ -71,7 +71,7 @@ function toRecordWithItems(row: Invoice & { items: InvoiceItem[] }): InvoiceWith
 function buildWhere(ownerId: string, filter: InvoiceFilter): Prisma.InvoiceWhereInput {
   const q = filter.q?.trim()
   // Tax codes are stored as digits only, so "0101234567-001" must match "0101234567001"
-  const taxCodeQuery = q && /^[\d\s-]+$/.test(q) ? q.replaceAll(/[\s-]/g, '') : q
+  const taxCodeQuery = q && /^\d[\d\s-]*$/.test(q) ? q.replaceAll(/[\s-]/g, '') : q
   return {
     ownerId,
     status: filter.status,
