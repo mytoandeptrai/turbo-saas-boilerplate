@@ -22,6 +22,10 @@ export interface ReconciliationResult {
 const toDecimal = (value: string): Decimal => parseDecimal(value) ?? 0n
 const money = (value: Decimal): string => formatDecimal(value, 2)
 
+/** A line without a tax amount carries no tax when its rate is 0% or non-numeric (KCT, KKKNT) */
+const isUntaxedRate = (vatRate: string | null): boolean =>
+  vatRate !== null && !(Number.parseFloat(vatRate) > 0)
+
 /**
  * Arithmetic reconciliation of an invoice.
  *
@@ -46,11 +50,12 @@ export function reconcileInvoice(invoice: ParsedInvoice): ReconciliationResult {
   if (lines.length > 0) {
     const tolerance = ONE * BigInt(lines.length)
 
-    const lineSubtotal = sum(
-      lines.map((item) =>
-        item.kind === 'DISCOUNT' ? -abs(toDecimal(item.amount)) : toDecimal(item.amount),
-      ),
-    )
+    // Discounts reduce the subtotal; on a negative adjustment invoice they are reversed instead
+    const discountSign = subtotal < 0n ? 1n : -1n
+    const signed = (item: { kind: string }, value: Decimal): Decimal =>
+      item.kind === 'DISCOUNT' ? discountSign * abs(value) : value
+
+    const lineSubtotal = sum(lines.map((item) => signed(item, toDecimal(item.amount))))
     if (abs(lineSubtotal - subtotal) > tolerance) {
       issues.push({
         code: 'SUBTOTAL_MISMATCH',
@@ -59,12 +64,8 @@ export function reconcileInvoice(invoice: ParsedInvoice): ReconciliationResult {
       })
     }
 
-    if (lines.every((item) => item.vatAmount !== null)) {
-      const lineVat = sum(
-        lines.map((item) =>
-          item.kind === 'DISCOUNT' ? -abs(toDecimal(item.vatAmount!)) : toDecimal(item.vatAmount!),
-        ),
-      )
+    if (lines.every((item) => item.vatAmount !== null || isUntaxedRate(item.vatRate))) {
+      const lineVat = sum(lines.map((item) => signed(item, toDecimal(item.vatAmount ?? '0'))))
       if (abs(lineVat - vat) > tolerance) {
         issues.push({
           code: 'VAT_MISMATCH',

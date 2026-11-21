@@ -132,4 +132,46 @@ describe('reconcileInvoice', () => {
 
     expect(reconcileInvoice(target).status).toBe('VALID')
   })
+
+  it('still checks VAT when an exempt line has no tax amount', () => {
+    const target = invoice({
+      subtotalAmount: '1500000.00',
+      vatAmount: '150000.00',
+      totalAmount: '1650000.00',
+      items: [
+        item(),
+        item({
+          lineNumber: 2,
+          amount: '500000.00',
+          quantity: null,
+          unitPrice: null,
+          vatRate: 'KCT',
+          vatAmount: null,
+        }),
+      ],
+    })
+
+    expect(codes(target)).toEqual(['VAT_MISMATCH'])
+  })
+
+  it('reverses discounts on a negative adjustment invoice', () => {
+    const target = invoice({
+      subtotalAmount: '-900000.00',
+      vatAmount: '-90000.00',
+      totalAmount: '-990000.00',
+      items: [
+        item({ quantity: null, unitPrice: null, amount: '-1000000.00', vatAmount: '-100000.00' }),
+        item({
+          kind: 'DISCOUNT',
+          lineNumber: 2,
+          quantity: null,
+          unitPrice: null,
+          amount: '-100000.00',
+          vatAmount: '-10000.00',
+        }),
+      ],
+    })
+
+    expect(reconcileInvoice(target)).toEqual({ status: 'VALID', issues: [] })
+  })
 })
