@@ -1,4 +1,5 @@
 const VND_FORMATTER = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 2 })
+const QUANTITY_FORMATTER = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 6 })
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})/
 
 /** Formats a decimal string as Vietnamese money: "5400000.00" → "5.400.000 ₫" */
@@ -14,7 +15,7 @@ export function formatMoney(value: string | number | null | undefined, currency 
 export function formatNumber(value: string | number | null | undefined): string {
   if (value === null || value === undefined || value === '') return '—'
   const amount = Number(value)
-  return Number.isNaN(amount) ? '—' : VND_FORMATTER.format(amount)
+  return Number.isNaN(amount) ? '—' : QUANTITY_FORMATTER.format(amount)
 }
 
 /** Formats an ISO date or date-time as dd/mm/yyyy without timezone shifts */
