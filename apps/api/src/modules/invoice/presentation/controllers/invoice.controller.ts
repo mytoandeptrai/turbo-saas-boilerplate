@@ -2,6 +2,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -52,6 +53,8 @@ import {
 import type { Response } from 'express'
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024
+// Tax data must not be served from a shared or stale HTTP cache; ETag revalidation still applies
+const NO_CACHE = 'private, no-cache'
 const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 type AuthenticatedRequest = Express.Request & { user: { id: string } }
@@ -113,6 +116,7 @@ export class InvoiceController {
   }
 
   @Get()
+  @Header('Cache-Control', NO_CACHE)
   @ApiOperation({ summary: 'List invoices (offset pagination with filters)' })
   @ApiResponse({ status: 200, type: InvoiceListResponseDto })
   async list(
@@ -138,6 +142,7 @@ export class InvoiceController {
 
   // Static routes must stay above ':id'
   @Get('stats')
+  @Header('Cache-Control', NO_CACHE)
   @ApiOperation({ summary: 'Invoice totals for the summary cards' })
   @ApiResponse({ status: 200, type: InvoiceStatsResponseDto })
   async stats(
@@ -172,6 +177,7 @@ export class InvoiceController {
   }
 
   @Get(':id')
+  @Header('Cache-Control', NO_CACHE)
   @ApiOperation({ summary: 'Get invoice details with line items' })
   @ApiParam({ name: 'id', description: 'Invoice ID', format: 'uuid' })
   @ApiResponse({ status: 200, type: InvoiceDetailResponseDto })

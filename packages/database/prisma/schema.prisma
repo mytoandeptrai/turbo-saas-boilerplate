@@ -225,6 +225,15 @@ enum InvoiceProvider {
   @@map("invoice_provider")
 }
 
+enum InvoiceItemKind {
+  GOODS
+  PROMOTION
+  DISCOUNT
+  NOTE
+
+  @@map("invoice_item_kind")
+}
+
 model Invoice {
   id               String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   ownerId          String          @map("owner_id")
@@ -263,16 +272,17 @@ model Invoice {
 model InvoiceItem {
   id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   invoiceId      String  @map("invoice_id") @db.Uuid
+  kind            InvoiceItemKind @default(GOODS)
   lineNumber     Int     @map("line_number") // STT
   code           String? @db.VarChar(50) // MHHDVu
   name           String // THHDVu
   unit           String? @db.VarChar(50) // DVTinh
-  quantity       Decimal @db.Decimal(18, 6) // SLuong
-  unitPrice      Decimal @map("unit_price") @db.Decimal(18, 6) // DGia
+  quantity       Decimal?@db.Decimal(18, 6) // SLuong
+  unitPrice      Decimal?@map("unit_price") @db.Decimal(18, 6) // DGia
   discountAmount Decimal @default(0) @map("discount_amount") @db.Decimal(18, 2) // STCKhau
   amount         Decimal @db.Decimal(18, 2) // ThTien
   vatRate        String? @map("vat_rate") @db.VarChar(10) // TSuat: "10%", "KCT", "KKKNT"…
-  vatAmount      Decimal @default(0) @map("vat_amount") @db.Decimal(18, 2) // TThue
+  vatAmount      Decimal?@map("vat_amount") @db.Decimal(18, 2) // TThue
 
   invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 

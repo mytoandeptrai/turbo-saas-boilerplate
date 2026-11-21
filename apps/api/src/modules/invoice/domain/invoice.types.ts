@@ -5,7 +5,8 @@ export const INVOICE_STATUSES = ['VALID', 'MISMATCH'] as const
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number]
 
 /** Line nature (TChat in 1450/QD-TCT) */
-export type InvoiceItemKind = 'GOODS' | 'PROMOTION' | 'DISCOUNT' | 'NOTE'
+export const INVOICE_ITEM_KINDS = ['GOODS', 'PROMOTION', 'DISCOUNT', 'NOTE'] as const
+export type InvoiceItemKind = (typeof INVOICE_ITEM_KINDS)[number]
 
 /** Untrusted values exactly as read from a provider XML document */
 export interface RawInvoiceItem {
@@ -93,16 +94,17 @@ export interface ValidationIssue {
 
 export interface InvoiceItemRecord {
   id: string
+  kind: InvoiceItemKind
   lineNumber: number
   code: string | null
   name: string
   unit: string | null
-  quantity: string
-  unitPrice: string
+  quantity: string | null
+  unitPrice: string | null
   discountAmount: string
   amount: string
   vatRate: string | null
-  vatAmount: string
+  vatAmount: string | null
 }
 
 /** Persisted invoice as seen by the application layer */

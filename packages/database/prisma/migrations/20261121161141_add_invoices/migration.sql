@@ -4,8 +4,8 @@ CREATE TYPE "invoice_status" AS ENUM ('VALID', 'MISMATCH');
 -- CreateEnum
 CREATE TYPE "invoice_provider" AS ENUM ('TCT', 'VNPT', 'MISA', 'VIETTEL', 'FPT');
 
--- DropIndex
-DROP INDEX "articles_search_vector_idx";
+-- CreateEnum
+CREATE TYPE "invoice_item_kind" AS ENUM ('GOODS', 'PROMOTION', 'DISCOUNT', 'NOTE');
 
 -- CreateTable
 CREATE TABLE "invoices" (
@@ -41,16 +41,17 @@ CREATE TABLE "invoices" (
 CREATE TABLE "invoice_items" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "invoice_id" UUID NOT NULL,
+    "kind" "invoice_item_kind" NOT NULL DEFAULT 'GOODS',
     "line_number" INTEGER NOT NULL,
     "code" VARCHAR(50),
     "name" TEXT NOT NULL,
     "unit" VARCHAR(50),
-    "quantity" DECIMAL(18,6) NOT NULL,
-    "unit_price" DECIMAL(18,6) NOT NULL,
+    "quantity" DECIMAL(18,6),
+    "unit_price" DECIMAL(18,6),
     "discount_amount" DECIMAL(18,2) NOT NULL DEFAULT 0,
     "amount" DECIMAL(18,2) NOT NULL,
     "vat_rate" VARCHAR(10),
-    "vat_amount" DECIMAL(18,2) NOT NULL DEFAULT 0,
+    "vat_amount" DECIMAL(18,2),
 
     CONSTRAINT "invoice_items_pkey" PRIMARY KEY ("id")
 );

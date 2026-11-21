@@ -1742,6 +1742,11 @@ export interface components {
         InvoiceItemResponseDto: {
             /** Format: uuid */
             id: string;
+            /**
+             * @description Line nature: goods/service, promotion, trade discount or note
+             * @enum {string}
+             */
+            kind: "GOODS" | "PROMOTION" | "DISCOUNT" | "NOTE";
             /** @example 1 */
             lineNumber: number;
             /** @example GAO-ST25 */
@@ -1754,12 +1759,12 @@ export interface components {
              * @description Decimal string
              * @example 20
              */
-            quantity: string;
+            quantity: string | null;
             /**
              * @description Decimal string
              * @example 180000
              */
-            unitPrice: string;
+            unitPrice: string | null;
             /**
              * @description Decimal string
              * @example 0.00
@@ -1773,10 +1778,10 @@ export interface components {
             /** @example 5% */
             vatRate: string | null;
             /**
-             * @description Decimal string
+             * @description Decimal string; null when the invoice has no per-line tax
              * @example 180000.00
              */
-            vatAmount: string;
+            vatAmount: string | null;
         };
         InvoiceDetailResponseDto: {
             /** Format: uuid */

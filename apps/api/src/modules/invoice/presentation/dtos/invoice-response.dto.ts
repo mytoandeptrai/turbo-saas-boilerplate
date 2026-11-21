@@ -1,6 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 
-import { INVOICE_PROVIDERS, INVOICE_STATUSES } from '@/modules/invoice/domain/invoice.types'
+import {
+  INVOICE_ITEM_KINDS,
+  INVOICE_PROVIDERS,
+  INVOICE_STATUSES,
+} from '@/modules/invoice/domain/invoice.types'
 import { OffsetListResponseDto } from '@/shared-kernel/infrastructure/dtos/list-response.dto'
 
 import type { InvoiceStats } from '@/modules/invoice/application/ports/invoice.repository.port'
@@ -9,6 +13,7 @@ import type {
   UploadOutcome,
 } from '@/modules/invoice/application/services/invoice.service'
 import type {
+  InvoiceItemKind,
   InvoiceItemRecord,
   InvoiceProvider,
   InvoiceRecord,
@@ -44,6 +49,12 @@ export class InvoiceItemResponseDto {
   @ApiProperty({ format: 'uuid' })
   id: string
 
+  @ApiProperty({
+    enum: INVOICE_ITEM_KINDS,
+    description: 'Line nature: goods/service, promotion, trade discount or note',
+  })
+  kind: InvoiceItemKind
+
   @ApiProperty({ example: 1 })
   lineNumber: number
 
@@ -56,11 +67,11 @@ export class InvoiceItemResponseDto {
   @ApiProperty({ type: String, nullable: true, example: 'Túi' })
   unit: string | null
 
-  @ApiProperty({ description: 'Decimal string', example: '20' })
-  quantity: string
+  @ApiProperty({ type: String, nullable: true, description: 'Decimal string', example: '20' })
+  quantity: string | null
 
-  @ApiProperty({ description: 'Decimal string', example: '180000' })
-  unitPrice: string
+  @ApiProperty({ type: String, nullable: true, description: 'Decimal string', example: '180000' })
+  unitPrice: string | null
 
   @ApiProperty({ description: 'Decimal string', example: '0.00' })
   discountAmount: string
@@ -71,12 +82,18 @@ export class InvoiceItemResponseDto {
   @ApiProperty({ type: String, nullable: true, example: '5%' })
   vatRate: string | null
 
-  @ApiProperty({ description: 'Decimal string', example: '180000.00' })
-  vatAmount: string
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    description: 'Decimal string; null when the invoice has no per-line tax',
+    example: '180000.00',
+  })
+  vatAmount: string | null
 
   static fromRecord(item: InvoiceItemRecord): InvoiceItemResponseDto {
     const dto = new InvoiceItemResponseDto()
     dto.id = item.id
+    dto.kind = item.kind
     dto.lineNumber = item.lineNumber
     dto.code = item.code
     dto.name = item.name

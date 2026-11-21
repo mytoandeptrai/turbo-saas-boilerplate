@@ -6,6 +6,15 @@ import type { InvoiceWithItems } from '@/modules/invoice/domain/invoice.types'
 import type { Worksheet } from 'exceljs'
 
 const STATUS_LABELS = { VALID: 'Hợp lệ', MISMATCH: 'Lệch tiền' } as const
+const KIND_LABELS = {
+  GOODS: 'Hàng hóa, dịch vụ',
+  PROMOTION: 'Khuyến mại',
+  DISCOUNT: 'Chiết khấu thương mại',
+  NOTE: 'Ghi chú',
+} as const
+
+const optionalNumber = (value: string | null): number | null =>
+  value === null ? null : Number(value)
 const MONEY_FORMAT = '#,##0.##'
 const DATE_FORMAT = 'dd/mm/yyyy'
 const FORMULA_PREFIX = /^[=+\-@\t\r]/
@@ -51,6 +60,7 @@ export class ExcelJsInvoiceExporter implements InvoiceExcelExporter {
       { header: 'Ngày lập', key: 'issuedAt', width: 12, style: { numFmt: DATE_FORMAT } },
       { header: 'MST người bán', key: 'sellerTaxCode', width: 16 },
       { header: 'STT', key: 'lineNumber', width: 6 },
+      { header: 'Tính chất', key: 'kind', width: 22 },
       { header: 'Mã hàng', key: 'code', width: 14 },
       { header: 'Tên hàng hóa, dịch vụ', key: 'name', width: 40 },
       { header: 'ĐVT', key: 'unit', width: 10 },
@@ -88,15 +98,16 @@ export class ExcelJsInvoiceExporter implements InvoiceExcelExporter {
           issuedAt: invoice.issuedAt,
           sellerTaxCode: invoice.sellerTaxCode,
           lineNumber: item.lineNumber,
+          kind: KIND_LABELS[item.kind],
           code: safeText(item.code),
           name: safeText(item.name),
           unit: safeText(item.unit),
-          quantity: Number(item.quantity),
-          unitPrice: Number(item.unitPrice),
+          quantity: optionalNumber(item.quantity),
+          unitPrice: optionalNumber(item.unitPrice),
           discount: Number(item.discountAmount),
           amount: Number(item.amount),
           vatRate: safeText(item.vatRate),
-          vatAmount: Number(item.vatAmount),
+          vatAmount: optionalNumber(item.vatAmount),
         })
       }
     }
