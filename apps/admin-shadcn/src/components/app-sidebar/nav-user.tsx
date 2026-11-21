@@ -1,6 +1,8 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/avatar'
+import { Button } from '@workspace/ui/components/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,20 +12,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@workspace/ui/components/dropdown-menu'
-import { Button } from '@workspace/ui/components/button'
-import {
-  ChevronsUpDownIcon,
-  LogOutIcon,
-  MoonIcon,
-  SunIcon,
-  SunMoonIcon,
-} from 'lucide-react'
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from '@workspace/ui/components/sidebar'
+import { ChevronsUpDownIcon, LogOutIcon, MoonIcon, SunIcon, SunMoonIcon } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useRouter } from 'next/navigation'
 
@@ -41,12 +36,15 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter()
+  const queryClient = useQueryClient()
   const { theme, setTheme } = useTheme()
 
   const handleLogout = () => {
     removeToken()
     removeRefreshToken()
     removeUser()
+    // Cached responses belong to the signed-out account
+    queryClient.clear()
     router.push(appPaths.auth.login.getHref())
   }
 
