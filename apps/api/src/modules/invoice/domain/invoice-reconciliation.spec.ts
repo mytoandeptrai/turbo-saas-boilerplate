@@ -174,4 +174,23 @@ describe('reconcileInvoice', () => {
 
     expect(reconcileInvoice(target)).toEqual({ status: 'VALID', issues: [] })
   })
+
+  it('subtracts a discount-only adjustment', () => {
+    const target = invoice({
+      subtotalAmount: '-100000.00',
+      vatAmount: '-10000.00',
+      totalAmount: '-110000.00',
+      items: [
+        item({
+          kind: 'DISCOUNT',
+          quantity: null,
+          unitPrice: null,
+          amount: '100000.00',
+          vatAmount: '10000.00',
+        }),
+      ],
+    })
+
+    expect(reconcileInvoice(target)).toEqual({ status: 'VALID', issues: [] })
+  })
 })

@@ -50,8 +50,11 @@ export function reconcileInvoice(invoice: ParsedInvoice): ReconciliationResult {
   if (lines.length > 0) {
     const tolerance = ONE * BigInt(lines.length)
 
-    // Discounts reduce the subtotal; on a negative adjustment invoice they are reversed instead
-    const discountSign = subtotal < 0n ? 1n : -1n
+    // Discounts reduce the subtotal; when the goods themselves are reversed (negative), so are they
+    const goodsTotal = sum(
+      lines.filter((item) => item.kind !== 'DISCOUNT').map((item) => toDecimal(item.amount)),
+    )
+    const discountSign = goodsTotal < 0n ? 1n : -1n
     const signed = (item: { kind: string }, value: Decimal): Decimal =>
       item.kind === 'DISCOUNT' ? discountSign * abs(value) : value
 
