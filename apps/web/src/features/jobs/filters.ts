@@ -1,4 +1,4 @@
-import { extractTechTags, TECH_TAGS } from '@workspace/ats-scrapers/tech-tags'
+import { resolveTechTag, TECH_TAGS } from '@workspace/ats-scrapers/tech-tags'
 
 import type { Prisma } from '@workspace/database'
 
@@ -88,10 +88,10 @@ export function buildJobWhere(filters: JobFilters): Prisma.JobWhereInput {
   }
   if (filters.q) {
     const needle = filters.q.toLowerCase()
-    // Aliases ("PostgreSQL", "golang") resolve to the canonical tag stored on the job.
-    const aliasTags = new Set(extractTechTags(filters.q))
+    // A query that is itself a tag alias ("PostgreSQL", "GOLANG") matches the canonical tag.
+    const aliasTag = resolveTechTag(filters.q)
     const matchingTags = TECH_TAGS.filter(
-      (tag) => tag.toLowerCase().includes(needle) || aliasTags.has(tag),
+      (tag) => tag.toLowerCase().includes(needle) || tag === aliasTag,
     )
     and.push({
       OR: [

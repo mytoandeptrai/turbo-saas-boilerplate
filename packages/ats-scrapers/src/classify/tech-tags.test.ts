@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { extractTechTags } from './tech-tags'
+import { extractTechTags, resolveTechTag } from './tech-tags'
 
 describe('extractTechTags', () => {
   it('matches keywords in the title and the description', () => {
@@ -52,5 +52,24 @@ describe('extractTechTags', () => {
 
   it('handles a missing description', () => {
     expect(extractTechTags('Rust Engineer', null)).toEqual(['Rust'])
+  })
+})
+
+describe('resolveTechTag', () => {
+  it.each([
+    ['PostgreSQL', 'Postgres'],
+    ['GOLANG', 'Go'],
+    ['golang', 'Go'],
+    ['react.js', 'React'],
+    ['node js', 'Node.js'],
+    [' nextjs ', 'Next.js'],
+    ['llms', 'LLM'],
+  ])('resolves %j to %s', (term, tag) => {
+    expect(resolveTechTag(term)).toBe(tag)
+  })
+
+  it('returns null when the term is more than a tag', () => {
+    expect(resolveTechTag('Senior Python Engineer')).toBeNull()
+    expect(resolveTechTag('designer')).toBeNull()
   })
 })

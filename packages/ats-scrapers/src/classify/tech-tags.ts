@@ -36,3 +36,18 @@ export function extractTechTags(title: string, description?: string | null): str
   const haystack = `${title}\n${description ?? ''}`
   return TECH_TAG_PATTERNS.filter(({ pattern }) => pattern.test(haystack)).map(({ tag }) => tag)
 }
+
+const normalizeTerm = (term: string): string => term.toLowerCase().replaceAll(/[\s.-]/g, '')
+
+const TAG_BY_TERM: ReadonlyMap<string, string> = new Map([
+  ...TECH_TAGS.map((tag) => [normalizeTerm(tag), tag] as const),
+  ['reactjs', 'React'],
+  ['golang', 'Go'],
+  ['postgresql', 'Postgres'],
+  ['llms', 'LLM'],
+])
+
+/** Canonical tag for a search term that is, as a whole, a tag name or alias ("GOLANG", "node js"). */
+export function resolveTechTag(term: string): string | null {
+  return TAG_BY_TERM.get(normalizeTerm(term)) ?? null
+}

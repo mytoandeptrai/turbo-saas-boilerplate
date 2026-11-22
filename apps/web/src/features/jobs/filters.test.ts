@@ -106,22 +106,29 @@ describe('buildJobWhere', () => {
     ])
   })
 
-  it('matches tech tags by alias in free-text search', () => {
-    expect(buildJobWhere({ ...DEFAULT_FILTERS, region: 'all', q: 'PostgreSQL' }).AND).toEqual([
+  it.each([
+    ['PostgreSQL', 'Postgres'],
+    ['golang', 'Go'],
+    ['GOLANG', 'Go'],
+  ])('matches the canonical tech tag when %j is searched', (q, tag) => {
+    expect(buildJobWhere({ ...DEFAULT_FILTERS, region: 'all', q }).AND).toEqual([
       {
         OR: [
-          { title: { contains: 'PostgreSQL', mode: 'insensitive' } },
-          { company: { name: { contains: 'PostgreSQL', mode: 'insensitive' } } },
-          { techTags: { hasSome: ['Postgres'] } },
+          { title: { contains: q, mode: 'insensitive' } },
+          { company: { name: { contains: q, mode: 'insensitive' } } },
+          { techTags: { hasSome: [tag] } },
         ],
       },
     ])
-    expect(buildJobWhere({ ...DEFAULT_FILTERS, region: 'all', q: 'golang' }).AND).toEqual([
+  })
+
+  it('does not widen a multi-word search to every job with a mentioned tag', () => {
+    const q = 'Senior Python Engineer'
+    expect(buildJobWhere({ ...DEFAULT_FILTERS, region: 'all', q }).AND).toEqual([
       {
         OR: [
-          { title: { contains: 'golang', mode: 'insensitive' } },
-          { company: { name: { contains: 'golang', mode: 'insensitive' } } },
-          { techTags: { hasSome: ['Go'] } },
+          { title: { contains: q, mode: 'insensitive' } },
+          { company: { name: { contains: q, mode: 'insensitive' } } },
         ],
       },
     ])
