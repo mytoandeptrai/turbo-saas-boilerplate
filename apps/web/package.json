@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@t3-oss/env-nextjs": "^0.13.10",
+    "@vercel/analytics": "^2.0.1",
     "@workspace/ats-scrapers": "workspace:*",
     "@workspace/database": "workspace:*",
     "@workspace/ui": "workspace:*",

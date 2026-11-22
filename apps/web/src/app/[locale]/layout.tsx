@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/next'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { Be_Vietnam_Pro } from 'next/font/google'
@@ -58,6 +59,7 @@ export default async function LocaleLayout({
       </head>
       <body className="min-h-dvh bg-background font-sans text-foreground antialiased">
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <Analytics />
       </body>
     </html>
   )
