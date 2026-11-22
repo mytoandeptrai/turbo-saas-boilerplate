@@ -11,7 +11,8 @@ function uniqueTrimmed(values: readonly string[]): string[] {
 
 /**
  * Builds the raw location label. Remote jobs are prefixed with "Remote - "; a remote job
- * without any geographic restriction becomes "Remote - Remote" (classified as worldwide).
+ * without any geographic restriction becomes "Remote - Remote" (classified as worldwide
+ * unless the title names a region).
  */
 export function buildLocationRaw(locations: readonly string[], isRemote: boolean): string | null {
   const places = uniqueTrimmed(locations)
@@ -36,7 +37,7 @@ export function normalizeJob(raw: RawJob): NormalizedJob {
     title,
     department: raw.department?.trim() || null,
     locationRaw,
-    remoteScope: classifyRemoteScope(locationRaw),
+    remoteScope: classifyRemoteScope(locationRaw, title),
     ...toMonthlySalary(raw.salary),
     techTags: extractTechTags(title, description),
     applyUrl: raw.applyUrl,

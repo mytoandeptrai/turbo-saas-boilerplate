@@ -60,6 +60,11 @@ describe('normalizeJob', () => {
     })
   })
 
+  it('does not call a remote job worldwide when its title names a region', () => {
+    const job = normalizeJob({ ...rawJob, title: 'Solutions Engineer - Americas' })
+    expect(job).toMatchObject({ locationRaw: 'Remote - Remote', remoteScope: 'UNKNOWN' })
+  })
+
   it('keeps optional fields null', () => {
     const job = normalizeJob({
       ...rawJob,

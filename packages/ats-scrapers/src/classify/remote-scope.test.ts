@@ -38,4 +38,35 @@ describe('classifyRemoteScope', () => {
     expect(classifyRemoteScope('Remote - Worldwide (United States preferred)')).toBe('WORLDWIDE')
     expect(classifyRemoteScope('Remote - Singapore / United States')).toBe('APAC_FRIENDLY')
   })
+
+  describe('with a location that only says remote', () => {
+    it.each([
+      'Due Diligence Analyst - Americas',
+      'Sr. Customer Success Manager - EMEA',
+      'Enterprise Account Executive - USA',
+      'Senior Solution Engineer - North America',
+      'Account Management Director (EU) or (US)',
+      'Channel Sales Manager - SEA',
+      'Lead Instructor: Data Center Technician (Australia)',
+      'Regional Sales Director - West Coast',
+    ])('does not call "%s" worldwide', (title) => {
+      expect(classifyRemoteScope('Remote - Remote', title)).toBe('UNKNOWN')
+    })
+
+    it.each([
+      'Senior TypeScript Engineer',
+      'Sales Director, International',
+      'Japanese Translation Editor (Part-time, contract)',
+      'Join us: Founding GTM',
+      'Overseas Support Engineer',
+      'Indiana Jones Fan Club Manager',
+    ])('keeps "%s" worldwide', (title) => {
+      expect(classifyRemoteScope('Remote - Remote', title)).toBe('WORLDWIDE')
+    })
+  })
+
+  it('ignores the title when the location itself says where the job is open', () => {
+    expect(classifyRemoteScope('Remote - Worldwide', 'Account Executive - EMEA')).toBe('WORLDWIDE')
+    expect(classifyRemoteScope('Remote - APAC', 'Account Executive - USA')).toBe('APAC_FRIENDLY')
+  })
 })
