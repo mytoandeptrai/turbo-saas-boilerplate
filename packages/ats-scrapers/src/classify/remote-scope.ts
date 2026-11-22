@@ -44,16 +44,22 @@ const TITLE_REGION_NAMES = [
   'West Coast',
   'East Coast',
 ]
-/**
- * Matched case-sensitively: "US" is a region, "us" is not. "SEA" is left out because it
- * also abbreviates search engine advertising.
- */
+/** Matched case-sensitively: "US" is a region, "us" is not. */
 const TITLE_REGION_CODES = ['US', 'USA', 'EU', 'UK', 'AMER', 'ANZ', 'APJ', 'MENA', 'DACH']
 
 const TITLE_REGION_PATTERNS = [
   ...TITLE_REGION_NAMES.map((name) => toPattern(name)),
   ...TITLE_REGION_CODES.map((code) => toPattern(code, '')),
 ]
+
+/** "SEA" is Southeast Asia, except next to search-marketing terms ("SEO/SEA Specialist"). */
+const SOUTHEAST_ASIA_CODE = toPattern('SEA', '')
+const SEARCH_MARKETING_CODE = /(?<![A-Za-z0-9])(?:SEO|SEM|PPC)(?![A-Za-z0-9])/
+
+function titleNamesRegion(title: string): boolean {
+  if (TITLE_REGION_PATTERNS.some((pattern) => pattern.test(title))) return true
+  return SOUTHEAST_ASIA_CODE.test(title) && !SEARCH_MARKETING_CODE.test(title)
+}
 
 /**
  * Classifies how location-restricted a remote job is, based on its raw location text.
@@ -65,8 +71,7 @@ export function classifyRemoteScope(
   title?: string,
 ): RemoteScope {
   if (!locationRaw) return 'UNKNOWN'
-  const titleNamesRegion = title && TITLE_REGION_PATTERNS.some((pattern) => pattern.test(title))
-  if (titleNamesRegion && BARE_REMOTE.test(locationRaw)) return 'UNKNOWN'
+  if (title && BARE_REMOTE.test(locationRaw) && titleNamesRegion(title)) return 'UNKNOWN'
   const match = COMPILED_RULES.find(({ patterns }) =>
     patterns.some((pattern) => pattern.test(locationRaw)),
   )

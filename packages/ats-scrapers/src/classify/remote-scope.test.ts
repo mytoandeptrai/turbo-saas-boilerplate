@@ -46,6 +46,8 @@ describe('classifyRemoteScope', () => {
       'Enterprise Account Executive - USA',
       'Senior Solution Engineer - North America',
       'Account Management Director (EU) or (US)',
+      'Channel Sales Manager - SEA',
+      'Account Executive (SEA only)',
       'Lead Instructor: Data Center Technician (Australia)',
       'Regional Sales Director - West Coast',
     ])('does not call "%s" worldwide', (title) => {
