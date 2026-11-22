@@ -1,6 +1,5 @@
 import { cn } from '@workspace/ui/lib/utils'
-
-import { remoteScopeLabel } from '@/features/jobs/format'
+import { useTranslations } from 'next-intl'
 
 import type { RemoteScope } from '@/features/jobs/types'
 
@@ -12,6 +11,8 @@ const SCOPE_CLASSES: Record<RemoteScope, string> = {
 }
 
 export function ScopeBadge({ scope, className }: { scope: RemoteScope; className?: string }) {
+  const t = useTranslations('Scope')
+
   return (
     <span
       data-scope={scope}
@@ -21,7 +22,7 @@ export function ScopeBadge({ scope, className }: { scope: RemoteScope; className
         className,
       )}
     >
-      {remoteScopeLabel(scope)}
+      {t(scope)}
     </span>
   )
 }

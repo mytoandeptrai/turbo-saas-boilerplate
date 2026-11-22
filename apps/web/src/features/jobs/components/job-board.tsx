@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useOptimistic, useRef, useState, useTransition } from 'react'
 
@@ -35,6 +36,7 @@ function isTypingTarget(target: EventTarget | null): boolean {
 }
 
 export function JobBoard({ filters, jobs, total, openSlug, openJob, description }: JobBoardProps) {
+  const t = useTranslations('Jobs')
   const router = useRouter()
   const pathname = usePathname()
   const [isPending, startTransition] = useTransition()
@@ -154,7 +156,7 @@ export function JobBoard({ filters, jobs, total, openSlug, openJob, description 
   const descriptionReady = url.openSlug === openSlug
 
   return (
-    <section aria-label="Jobs">
+    <section aria-label={t('sectionLabel')} data-testid="job-board">
       <FilterBar
         filters={url.filters}
         query={draftQuery ?? url.filters.q}
@@ -165,10 +167,10 @@ export function JobBoard({ filters, jobs, total, openSlug, openJob, description 
 
       <div className="mt-8 flex items-center justify-between border-b border-border pb-2 text-xs text-muted-foreground">
         <span aria-live="polite" data-testid="job-count">
-          {total.toLocaleString('en-US')} {total === 1 ? 'job' : 'jobs'}
+          {t('count', { count: total })}
         </span>
         <span className={isPending ? 'opacity-100' : 'opacity-0'} aria-hidden={!isPending}>
-          Updating…
+          {t('updating')}
         </span>
       </div>
 
@@ -190,10 +192,7 @@ export function JobBoard({ filters, jobs, total, openSlug, openJob, description 
           ))}
         </ul>
       ) : (
-        <p className="py-16 text-center text-sm text-muted-foreground">
-          No jobs match these filters. Try removing a tag or turning off “Worldwide &amp; APAC
-          Only”.
-        </p>
+        <p className="py-16 text-center text-sm text-muted-foreground">{t('empty')}</p>
       )}
 
       {jobs.length < total && url.filters.show < MAX_SHOWN ? (
@@ -208,7 +207,7 @@ export function JobBoard({ filters, jobs, total, openSlug, openJob, description 
             }
             className="h-9 rounded-lg border border-border px-4 text-sm text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30"
           >
-            Show more jobs
+            {t('showMore')}
           </button>
         </div>
       ) : null}

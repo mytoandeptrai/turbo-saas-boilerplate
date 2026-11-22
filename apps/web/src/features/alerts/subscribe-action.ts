@@ -2,12 +2,15 @@
 
 import { db } from '@/lib/db'
 
-import { subscribeSchema } from './subscribe-schema'
+import { SUBSCRIBE_ISSUES, subscribeSchema } from './subscribe-schema'
+
+/** `Alerts.errors` translation key shown by the form. */
+export type SubscribeErrorCode = (typeof SUBSCRIBE_ISSUES)[number] | 'saveFailed'
 
 export type SubscribeState =
   | { status: 'idle' }
   | { status: 'success' }
-  | { status: 'error'; message: string }
+  | { status: 'error'; code: SubscribeErrorCode }
 
 /** Stores job-alert contacts; submitting the same contact twice is a no-op. */
 export async function subscribeToAlerts(
@@ -19,7 +22,8 @@ export async function subscribeToAlerts(
     telegram: String(formData.get('telegram') ?? ''),
   })
   if (!parsed.success) {
-    return { status: 'error', message: parsed.error.issues[0]?.message ?? 'Invalid input' }
+    const issue = SUBSCRIBE_ISSUES.find((code) => code === parsed.error.issues[0]?.message)
+    return { status: 'error', code: issue ?? 'contactRequired' }
   }
 
   const { email, telegram } = parsed.data
@@ -32,6 +36,6 @@ export async function subscribeToAlerts(
     ])
     return { status: 'success' }
   } catch {
-    return { status: 'error', message: 'Could not save your subscription. Please try again.' }
+    return { status: 'error', code: 'saveFailed' }
   }
 }

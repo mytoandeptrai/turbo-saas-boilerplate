@@ -6,8 +6,9 @@ import {
   SheetTitle,
 } from '@workspace/ui/components/sheet'
 import { ArrowUpRightIcon } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
-import { formatPostedAt, formatSalary } from '@/features/jobs/format'
+import { useJobLabels } from '@/features/jobs/use-job-labels'
 
 import { ScopeBadge } from './scope-badge'
 
@@ -34,8 +35,8 @@ function DescriptionSkeleton() {
 }
 
 export function JobDrawer({ open, job, description, onClose }: JobDrawerProps) {
-  const salary = job ? formatSalary(job.minSalary, job.maxSalary, job.currency) : null
-  const posted = job ? formatPostedAt(job.publishedAt) : null
+  const t = useTranslations('JobDetail')
+  const { salary, posted } = useJobLabels(job)
 
   return (
     <Sheet open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
@@ -57,7 +58,7 @@ export function JobDrawer({ open, job, description, onClose }: JobDrawerProps) {
                 <ScopeBadge scope={job.remoteScope} />
                 {job.locationRaw ? <span>{job.locationRaw}</span> : null}
                 {salary ? <span className="text-foreground/80 tabular-nums">{salary}</span> : null}
-                {posted ? <span>Posted {posted}</span> : null}
+                {posted ? <span>{t('posted', { age: posted })}</span> : null}
               </div>
               {job.techTags.length > 0 ? (
                 <div className="flex flex-wrap gap-1">
@@ -84,15 +85,15 @@ export function JobDrawer({ open, job, description, onClose }: JobDrawerProps) {
                 rel="noopener noreferrer"
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-foreground text-base font-semibold text-background transition-opacity outline-none hover:opacity-90 focus-visible:ring-3 focus-visible:ring-ring/50"
               >
-                Apply on Official ATS
+                {t('apply')}
                 <ArrowUpRightIcon aria-hidden className="size-4.5" />
               </a>
             </div>
           </>
         ) : (
           <SheetHeader className="p-6 pr-14">
-            <SheetTitle>This job is no longer available</SheetTitle>
-            <SheetDescription>It was removed from the company&apos;s ATS feed.</SheetDescription>
+            <SheetTitle>{t('unavailableTitle')}</SheetTitle>
+            <SheetDescription>{t('unavailableDescription')}</SheetDescription>
           </SheetHeader>
         )}
       </SheetContent>

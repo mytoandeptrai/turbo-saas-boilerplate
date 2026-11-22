@@ -1,14 +1,13 @@
+import { useTranslations } from 'next-intl'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
 /** Server-rendered Markdown job description; raw HTML in the source is not rendered. */
 export function JobDescription({ markdown }: { markdown: string | null }) {
+  const t = useTranslations('JobDetail')
+
   if (!markdown) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        No description was published for this job. See the official posting for details.
-      </p>
-    )
+    return <p className="text-sm text-muted-foreground">{t('noDescription')}</p>
   }
   return (
     <div className="job-prose">

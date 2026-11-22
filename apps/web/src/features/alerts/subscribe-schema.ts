@@ -2,6 +2,9 @@ import { z } from 'zod'
 
 const TELEGRAM_HANDLE = /^@?[A-Za-z]\w{4,31}$/
 
+/** Issue messages are `Alerts.errors` translation keys. */
+export const SUBSCRIBE_ISSUES = ['invalidEmail', 'invalidTelegram', 'contactRequired'] as const
+
 /** Lead-magnet input: an email, a Telegram handle, or both. */
 export const subscribeSchema = z
   .object({
@@ -9,19 +12,14 @@ export const subscribeSchema = z
       .string()
       .trim()
       .toLowerCase()
-      .pipe(z.union([z.literal(''), z.email('Enter a valid email address')])),
+      .pipe(z.union([z.literal(''), z.email('invalidEmail')])),
     telegram: z
       .string()
       .trim()
-      .pipe(
-        z.union([
-          z.literal(''),
-          z.string().regex(TELEGRAM_HANDLE, 'Enter a valid Telegram handle'),
-        ]),
-      ),
+      .pipe(z.union([z.literal(''), z.string().regex(TELEGRAM_HANDLE, 'invalidTelegram')])),
   })
   .refine(({ email, telegram }) => email !== '' || telegram !== '', {
-    message: 'Enter an email or a Telegram handle',
+    message: 'contactRequired',
   })
   .transform(({ email, telegram }) => ({
     email: email || null,

@@ -1,6 +1,6 @@
 import { cn } from '@workspace/ui/lib/utils'
 
-import { formatPostedAt, formatSalary } from '@/features/jobs/format'
+import { useJobLabels } from '@/features/jobs/use-job-labels'
 
 import { ScopeBadge } from './scope-badge'
 
@@ -18,8 +18,7 @@ type JobRowProps = {
 }
 
 export function JobRow({ job, href, isActive, onOpen, onHover, ref }: JobRowProps) {
-  const salary = formatSalary(job.minSalary, job.maxSalary, job.currency)
-  const posted = formatPostedAt(job.publishedAt)
+  const { salary, posted } = useJobLabels(job)
 
   return (
     <li>
@@ -68,7 +67,7 @@ export function JobRow({ job, href, isActive, onOpen, onHover, ref }: JobRowProp
           ) : null}
           <ScopeBadge scope={job.remoteScope} />
           {posted ? (
-            <span className="hidden w-14 text-right tabular-nums sm:inline">{posted}</span>
+            <span className="hidden min-w-14 text-right tabular-nums sm:inline">{posted}</span>
           ) : null}
         </div>
       </a>

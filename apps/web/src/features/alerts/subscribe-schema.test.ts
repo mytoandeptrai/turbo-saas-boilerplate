@@ -21,11 +21,13 @@ describe('subscribeSchema', () => {
   it('rejects an empty form', () => {
     const result = subscribeSchema.safeParse({ email: '', telegram: ' ' })
     expect(result.success).toBe(false)
-    expect(result.error?.issues[0]?.message).toBe('Enter an email or a Telegram handle')
+    expect(result.error?.issues[0]?.message).toBe('contactRequired')
   })
 
   it('rejects malformed contacts', () => {
-    expect(subscribeSchema.safeParse({ email: 'nope', telegram: '' }).success).toBe(false)
-    expect(subscribeSchema.safeParse({ email: '', telegram: 'a b' }).success).toBe(false)
+    const email = subscribeSchema.safeParse({ email: 'nope', telegram: '' })
+    expect(email.error?.issues[0]?.message).toBe('invalidEmail')
+    const telegram = subscribeSchema.safeParse({ email: '', telegram: 'a b' })
+    expect(telegram.error?.issues[0]?.message).toBe('invalidTelegram')
   })
 })

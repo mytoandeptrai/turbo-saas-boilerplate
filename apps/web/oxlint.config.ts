@@ -10,4 +10,11 @@ export default defineConfig({
     nextjs(),
     vitest({ files: ['**/*.{test,spec}.ts', '**/*.{test,spec}.tsx', '**/__tests__/**/*.ts'] }),
   ],
+  overrides: [
+    {
+      // The message dictionaries live in messages/, outside src/.
+      files: ['src/i18n/**/*.ts'],
+      rules: { 'import/no-relative-parent-imports': 'off' },
+    },
+  ],
 })
