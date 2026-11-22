@@ -1,4 +1,11 @@
-export { PrismaClient, Prisma, UserRole, LoginStatus } from '@prisma/client'
+export {
+  PrismaClient,
+  Prisma,
+  UserRole,
+  LoginStatus,
+  AtsProvider,
+  RemoteScope,
+} from '@prisma/client'
 export type {
   User,
   Account,
@@ -8,7 +15,10 @@ export type {
   Todo,
   Article,
   Order,
+  BackgroundJob,
+  Company,
   Job,
+  JobAlertSubscriber,
   AuditLog,
 } from '@prisma/client'
 

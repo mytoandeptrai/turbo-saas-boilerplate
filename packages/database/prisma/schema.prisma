@@ -21,6 +21,21 @@ enum LoginStatus {
   @@map("login_status")
 }
 
+enum AtsProvider {
+  ASHBY
+  GREENHOUSE
+  LEVER
+  WORKABLE
+  CUSTOM
+}
+
+enum RemoteScope {
+  WORLDWIDE
+  APAC_FRIENDLY
+  RESTRICTED_US_EU
+  UNKNOWN
+}
+
 model User {
   id              String     @id
   name            String
@@ -167,7 +182,8 @@ model Order {
   @@map("orders")
 }
 
-model Job {
+/// Async background job tracked by the Order module (table `jobs`).
+model BackgroundJob {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   type      String
   status    String   @default("pending")
@@ -205,4 +221,65 @@ model AuditLog {
   @@index([occurredAt], map: "audit_logs_occurred_at_idx")
   @@index([createdAt], map: "audit_logs_created_at_idx")
   @@map("audit_logs")
+}
+
+/// Company whose public ATS board is aggregated into the remote job board.
+model Company {
+  id           String      @id @default(cuid())
+  name         String
+  slug         String      @unique
+  logoUrl      String?
+  careerUrl    String
+  linkedInUrl  String?
+  country      String?
+  atsProvider  AtsProvider @default(CUSTOM)
+  atsSlug      String?
+  isActive     Boolean     @default(true)
+  lastSyncedAt DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  jobs         Job[]
+
+  @@index([atsProvider, isActive])
+}
+
+/// Job posting normalized from a company's ATS feed.
+model Job {
+  id             String      @id @default(cuid())
+  companyId      String
+  company        Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  externalId     String
+  title          String
+  slug           String      @unique
+  department     String?
+  locationRaw    String?
+  remoteScope    RemoteScope @default(UNKNOWN)
+  /// Monthly amount in `currency`; yearly/hourly ATS figures are converted on ingest.
+  minSalary      Int?
+  /// Monthly amount in `currency`; yearly/hourly ATS figures are converted on ingest.
+  maxSalary      Int?
+  currency       String?     @default("USD")
+  techTags       String[]
+  applyUrl       String
+  jobUrl         String?
+  /// Markdown converted from the ATS HTML description.
+  description    String?     @db.Text
+  isFeatured     Boolean     @default(false)
+  isActive       Boolean     @default(true)
+  publishedAt    DateTime?
+  lastVerifiedAt DateTime    @default(now())
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@unique([companyId, externalId])
+  @@index([remoteScope, isActive])
+  @@index([techTags])
+}
+
+/// Lead-magnet signup for new APAC job alerts (email and/or Telegram handle).
+model JobAlertSubscriber {
+  id        String   @id @default(cuid())
+  email     String?  @unique
+  telegram  String?  @unique
+  createdAt DateTime @default(now())
 }
