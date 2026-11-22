@@ -8,7 +8,9 @@ Enterprise SaaS admin skeleton with built-in auth, authorization, auditing, and 
 
 - `apps/api` — NestJS API; DDD layered architecture showcase
 - `apps/admin-shadcn` — Next.js admin panel (App Router + RSC)
+- `apps/web` — public remote job board (Next.js App Router, reads Postgres directly)
 - `packages/database` (`@workspace/database`) — Prisma schema and migrations
+- `packages/ats-scrapers` (`@workspace/ats-scrapers`) — ATS feed fetchers (Ashby, Greenhouse, Lever, Workable), job normalizer, company seed and job sync
 - `packages/api-types` (`@workspace/api-types`) — API types generated via openapi-typescript
 - `packages/ui` (`@workspace/ui`) — shared UI components built on `@base-ui/react`
 - `packages/icons` (`@workspace/icons`) — shared icon set
@@ -37,6 +39,15 @@ turbo typecheck     # Type check
 ```bash
 pnpm --filter api dev              # API on port 3000
 pnpm --filter admin-shadcn dev     # Admin panel on port 8080
+pnpm --filter web dev              # Job board on port 3001
+```
+
+## Job Board Data
+
+```bash
+pnpm --filter @workspace/database db:migrate:deploy     # Apply migrations
+pnpm --filter @workspace/ats-scrapers seed:companies    # Upsert companies from data/remote_companies_easy.csv
+pnpm --filter @workspace/ats-scrapers sync:jobs         # Sync jobs for companies with a resolved ATS board
 ```
 
 ## Development Workflows

@@ -11,7 +11,7 @@
     "typecheck": "turbo run typecheck",
     "deps": "turbo run deps",
     "prepare": "pnpm run setup:env",
-    "setup:env": "pnpm --filter api --filter admin-shadcn --filter @workspace/database exec cp .env.example .env"
+    "setup:env": "pnpm --filter api --filter admin-shadcn --filter web --filter @workspace/database --filter @workspace/ats-scrapers exec cp .env.example .env"
   },
   "devDependencies": {
     "@infra-x/code-quality": "^0.6.2",
