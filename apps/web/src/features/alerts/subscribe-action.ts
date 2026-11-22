@@ -26,8 +26,7 @@ export async function subscribeToAlerts(
   try {
     // One row per contact: a submission never changes a row someone else created.
     await Promise.all([
-      email &&
-        db.jobAlertSubscriber.upsert({ where: { email }, update: {}, create: { email } }),
+      email && db.jobAlertSubscriber.upsert({ where: { email }, update: {}, create: { email } }),
       telegram &&
         db.jobAlertSubscriber.upsert({ where: { telegram }, update: {}, create: { telegram } }),
     ])

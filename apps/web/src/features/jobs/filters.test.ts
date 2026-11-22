@@ -106,7 +106,6 @@ describe('buildJobWhere', () => {
     ])
   })
 
-
   it('matches tech tags by alias in free-text search', () => {
     expect(buildJobWhere({ ...DEFAULT_FILTERS, region: 'all', q: 'PostgreSQL' }).AND).toEqual([
       {
