@@ -1,0 +1,39 @@
+'use server'
+
+import { db } from '@/lib/db'
+
+import { subscribeSchema } from './subscribe-schema'
+
+export type SubscribeState =
+  | { status: 'idle' }
+  | { status: 'success' }
+  | { status: 'error'; message: string }
+
+/** Stores a job-alert subscriber; submitting the same contact twice is a no-op. */
+export async function subscribeToAlerts(
+  _previous: SubscribeState,
+  formData: FormData,
+): Promise<SubscribeState> {
+  const parsed = subscribeSchema.safeParse({
+    email: String(formData.get('email') ?? ''),
+    telegram: String(formData.get('telegram') ?? ''),
+  })
+  if (!parsed.success) {
+    return { status: 'error', message: parsed.error.issues[0]?.message ?? 'Invalid input' }
+  }
+
+  const { email, telegram } = parsed.data
+  const contacts = [...(email ? [{ email }] : []), ...(telegram ? [{ telegram }] : [])]
+  try {
+    const existing = await db.jobAlertSubscriber.findFirst({ where: { OR: contacts } })
+    await (existing
+      ? db.jobAlertSubscriber.update({
+          where: { id: existing.id },
+          data: { email: existing.email ?? email, telegram: existing.telegram ?? telegram },
+        })
+      : db.jobAlertSubscriber.create({ data: { email, telegram } }))
+    return { status: 'success' }
+  } catch {
+    return { status: 'error', message: 'Could not save your subscription. Please try again.' }
+  }
+}

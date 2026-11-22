@@ -1,0 +1,45 @@
+@import '@workspace/ui/globals.css';
+
+/* Markdown job descriptions rendered inside the detail drawer. */
+.job-prose {
+  @apply text-sm leading-relaxed text-foreground/85;
+}
+.job-prose > * + * {
+  @apply mt-3;
+}
+.job-prose :is(h1, h2, h3, h4) {
+  @apply mt-6 text-sm font-semibold text-foreground;
+}
+.job-prose :is(h1, h2) {
+  @apply text-base;
+}
+.job-prose ul {
+  @apply list-disc space-y-1 pl-5;
+}
+.job-prose ol {
+  @apply list-decimal space-y-1 pl-5;
+}
+.job-prose li > :is(ul, ol) {
+  @apply mt-1;
+}
+.job-prose a {
+  @apply text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground;
+}
+.job-prose strong {
+  @apply font-semibold text-foreground;
+}
+.job-prose hr {
+  @apply my-6 border-border;
+}
+.job-prose blockquote {
+  @apply border-l-2 border-border pl-4 text-muted-foreground;
+}
+.job-prose code {
+  @apply rounded bg-muted px-1 py-0.5 font-mono text-xs;
+}
+.job-prose table {
+  @apply block w-full overflow-x-auto text-left text-xs;
+}
+.job-prose :is(th, td) {
+  @apply border border-border px-2 py-1;
+}
