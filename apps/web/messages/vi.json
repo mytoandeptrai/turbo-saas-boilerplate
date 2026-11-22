@@ -1,0 +1,86 @@
+{
+  "Metadata": {
+    "title": "Việc làm kỹ sư phần mềm remote cho lập trình viên Việt Nam & APAC",
+    "description": "Việc làm kỹ sư phần mềm remote chọn lọc, nhận ứng viên ở Việt Nam và APAC, lấy trực tiếp từ ATS của các công ty. Ứng tuyển ngay trên trang ATS chính thức."
+  },
+  "Header": {
+    "brand": "Remote APAC Jobs",
+    "alerts": "Nhận thông báo việc làm"
+  },
+  "LocaleSwitcher": {
+    "label": "Đổi ngôn ngữ",
+    "en": "English",
+    "vi": "Tiếng Việt"
+  },
+  "Hero": {
+    "title": "Việc làm kỹ sư phần mềm remote chọn lọc cho lập trình viên Việt Nam & APAC",
+    "subtitle": "Lấy trực tiếp từ ATS của từng công ty và lọc theo nơi bạn thực sự được phép làm việc. Mỗi việc làm đều dẫn tới trang ứng tuyển chính thức.",
+    "worldwideJobs": "việc làm toàn cầu",
+    "apacJobs": "việc làm phù hợp APAC"
+  },
+  "Filters": {
+    "searchLabel": "Tìm việc làm",
+    "searchPlaceholder": "Tìm theo chức danh, công ty hoặc công nghệ…",
+    "apacOnly": "Chỉ Toàn cầu & APAC",
+    "minSalary": "Lương tối thiểu",
+    "salaryUnit": "USD / tháng",
+    "techTags": "Công nghệ",
+    "reset": "Đặt lại"
+  },
+  "Jobs": {
+    "sectionLabel": "Việc làm",
+    "count": "{count, plural, other {# việc làm}}",
+    "updating": "Đang cập nhật…",
+    "empty": "Không tìm thấy việc làm nào khớp tiêu chí của bạn. Hãy thử bỏ bớt một công nghệ hoặc tắt “Chỉ Toàn cầu & APAC”.",
+    "showMore": "Xem thêm việc làm",
+    "salaryPerMonth": "{amount}/tháng",
+    "age": {
+      "today": "hôm nay",
+      "days": "{count} ngày trước",
+      "months": "{count} tháng trước",
+      "years": "{count} năm trước"
+    }
+  },
+  "Scope": {
+    "WORLDWIDE": "Toàn cầu",
+    "APAC_FRIENDLY": "APAC",
+    "RESTRICTED_US_EU": "Chỉ Mỹ / EU",
+    "UNKNOWN": "Chưa rõ khu vực"
+  },
+  "JobDetail": {
+    "close": "Đóng",
+    "apply": "Ứng tuyển trên ATS chính thức",
+    "posted": "Đăng {age}",
+    "noDescription": "Việc làm này chưa có mô tả. Xem tin gốc để biết chi tiết.",
+    "unavailableTitle": "Việc làm này không còn tuyển",
+    "unavailableDescription": "Tin đã bị gỡ khỏi ATS của công ty."
+  },
+  "Alerts": {
+    "title": "Nhận việc làm phù hợp APAC sớm nhất",
+    "description": "Để lại email hoặc tài khoản Telegram, chúng tôi sẽ báo cho bạn khi có việc làm remote Toàn cầu và APAC mới.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "ban@example.com",
+    "telegramLabel": "Tài khoản Telegram",
+    "telegramPlaceholder": "@tai_khoan_telegram",
+    "submit": "Nhận thông báo",
+    "submitting": "Đang lưu…",
+    "success": "Bạn đã đăng ký thành công. Chúng tôi sẽ liên hệ khi có việc làm mới.",
+    "errors": {
+      "invalidEmail": "Nhập địa chỉ email hợp lệ",
+      "invalidTelegram": "Nhập tài khoản Telegram hợp lệ",
+      "contactRequired": "Nhập email hoặc tài khoản Telegram",
+      "saveFailed": "Không lưu được đăng ký. Vui lòng thử lại."
+    }
+  },
+  "Footer": {
+    "disclaimer": "Việc làm được đồng bộ từ ATS công khai của các công ty. Hồ sơ ứng tuyển gửi thẳng tới nhà tuyển dụng.",
+    "search": "tìm kiếm",
+    "navigate": "di chuyển",
+    "open": "mở"
+  },
+  "NotFound": {
+    "title": "Không tìm thấy trang",
+    "description": "Trang bạn đang tìm không tồn tại.",
+    "home": "Về trang việc làm"
+  }
+}

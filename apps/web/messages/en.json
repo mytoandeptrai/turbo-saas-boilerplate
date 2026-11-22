@@ -1,0 +1,86 @@
+{
+  "Metadata": {
+    "title": "Remote Engineering Jobs for Vietnamese & APAC Developers",
+    "description": "Curated remote engineering jobs open to Vietnam and APAC, sourced directly from company ATS feeds. Apply on the official ATS page."
+  },
+  "Header": {
+    "brand": "Remote APAC Jobs",
+    "alerts": "Get job alerts"
+  },
+  "LocaleSwitcher": {
+    "label": "Change language",
+    "en": "English",
+    "vi": "Tiếng Việt"
+  },
+  "Hero": {
+    "title": "Curated Remote Engineering Jobs for Vietnamese & APAC Developers",
+    "subtitle": "Pulled straight from company ATS feeds and filtered by where you can actually work from. Every job links to the official application page.",
+    "worldwideJobs": "Worldwide jobs",
+    "apacJobs": "APAC-friendly jobs"
+  },
+  "Filters": {
+    "searchLabel": "Search jobs",
+    "searchPlaceholder": "Search title, company or tech…",
+    "apacOnly": "Worldwide & APAC Only",
+    "minSalary": "Min salary",
+    "salaryUnit": "USD / month",
+    "techTags": "Tech tags",
+    "reset": "Reset"
+  },
+  "Jobs": {
+    "sectionLabel": "Jobs",
+    "count": "{count, plural, one {# job} other {# jobs}}",
+    "updating": "Updating…",
+    "empty": "No jobs found matching your criteria. Try removing a tag or turning off “Worldwide & APAC Only”.",
+    "showMore": "Show more jobs",
+    "salaryPerMonth": "{amount}/mo",
+    "age": {
+      "today": "today",
+      "days": "{count}d ago",
+      "months": "{count}mo ago",
+      "years": "{count}y ago"
+    }
+  },
+  "Scope": {
+    "WORLDWIDE": "Worldwide",
+    "APAC_FRIENDLY": "APAC",
+    "RESTRICTED_US_EU": "US / EU only",
+    "UNKNOWN": "Region unverified"
+  },
+  "JobDetail": {
+    "close": "Close",
+    "apply": "Apply on Official ATS",
+    "posted": "Posted {age}",
+    "noDescription": "No description was published for this job. See the official posting for details.",
+    "unavailableTitle": "This job is no longer available",
+    "unavailableDescription": "It was removed from the company's ATS feed."
+  },
+  "Alerts": {
+    "title": "Get new APAC-friendly jobs first",
+    "description": "Leave an email or a Telegram handle and we'll alert you when new Worldwide and APAC remote jobs land.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "telegramLabel": "Telegram handle",
+    "telegramPlaceholder": "@telegram_handle",
+    "submit": "Notify me",
+    "submitting": "Saving…",
+    "success": "You're on the list. We'll be in touch when new jobs are posted.",
+    "errors": {
+      "invalidEmail": "Enter a valid email address",
+      "invalidTelegram": "Enter a valid Telegram handle",
+      "contactRequired": "Enter an email or a Telegram handle",
+      "saveFailed": "Could not save your subscription. Please try again."
+    }
+  },
+  "Footer": {
+    "disclaimer": "Jobs are synced from public company ATS feeds. Applications go to the employer.",
+    "search": "search",
+    "navigate": "navigate",
+    "open": "open"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist.",
+    "home": "Back to the job board"
+  }
+}

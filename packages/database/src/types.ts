@@ -2,7 +2,7 @@ import type {
   Account,
   Article,
   AuditLog,
-  Job,
+  BackgroundJob,
   LoginLog,
   Order,
   Prisma,
@@ -52,8 +52,8 @@ export type InsertArticleDatabase = Prisma.ArticleUncheckedCreateInput
 export type OrderDatabase = Order
 export type InsertOrderDatabase = Prisma.OrderUncheckedCreateInput
 
-export type JobDatabase = Job
-export type InsertJobDatabase = Prisma.JobUncheckedCreateInput
+export type JobDatabase = BackgroundJob
+export type InsertJobDatabase = Prisma.BackgroundJobUncheckedCreateInput
 
 export type { AuditLog }
 export type InsertAuditLog = Prisma.AuditLogUncheckedCreateInput

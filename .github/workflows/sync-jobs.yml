@@ -1,0 +1,47 @@
+name: Sync Jobs
+
+on:
+  # Scheduled runs only fire on the default branch, so sync is triggered by pushes here
+  push:
+    branches:
+      - feat/remote-job-board-aggregator
+  workflow_dispatch:
+
+concurrency:
+  group: sync-jobs
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync ATS jobs
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build database package
+        run: pnpm --filter @workspace/database build
+
+      - name: Write Aiven CA certificate
+        run: printf '%s\n' "$AIVEN_CA_PEM" > "$RUNNER_TEMP/aiven-ca.pem"
+        env:
+          AIVEN_CA_PEM: ${{ secrets.AIVEN_CA_PEM }}
+
+      - name: Sync jobs
+        run: |
+          export DATABASE_URL="${AIVEN_DATABASE_URL}&sslcert=${RUNNER_TEMP}/aiven-ca.pem"
+          pnpm --filter @workspace/ats-scrapers sync:jobs
+        env:
+          # Base URL without sslcert, e.g. postgresql://...:23298/defaultdb?sslmode=require
+          AIVEN_DATABASE_URL: ${{ secrets.AIVEN_DATABASE_URL }}

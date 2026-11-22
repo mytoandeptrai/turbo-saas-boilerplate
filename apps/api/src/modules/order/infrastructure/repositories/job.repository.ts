@@ -18,12 +18,12 @@ export class JobRepositoryImpl implements JobRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findById(id: string): Promise<Job | null> {
-    const row = await this.prisma.job.findUnique({ where: { id } })
+    const row = await this.prisma.backgroundJob.findUnique({ where: { id } })
     return row ? this.toDomain(row) : null
   }
 
   async create(job: Omit<Job, 'createdAt' | 'updatedAt'>): Promise<Job> {
-    const row = await this.prisma.job.create({
+    const row = await this.prisma.backgroundJob.create({
       data: {
         id: job.id,
         type: job.type,
@@ -43,7 +43,7 @@ export class JobRepositoryImpl implements JobRepository {
     result?: unknown,
     error?: { code: string; message: string },
   ): Promise<void> {
-    await this.prisma.job.update({
+    await this.prisma.backgroundJob.update({
       where: { id },
       data: {
         status,
