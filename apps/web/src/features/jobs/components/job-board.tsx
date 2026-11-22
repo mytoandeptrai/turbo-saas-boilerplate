@@ -77,6 +77,10 @@ export function JobBoard({ filters, jobs, total, openSlug, openJob, description 
     navigate({ filters: url.filters, openSlug: job.slug }, mode)
   }
 
+  // A job opened from a shared link or by click is where j/k continue from.
+  const openIndex = url.openSlug ? jobs.findIndex((job) => job.slug === url.openSlug) : -1
+  const currentIndex = openIndex === -1 ? activeIndex : openIndex
+
   const moveTo = (index: number) => {
     const nextIndex = Math.min(Math.max(index, 0), jobs.length - 1)
     const job = jobs[nextIndex]
@@ -107,18 +111,18 @@ export function JobBoard({ filters, jobs, total, openSlug, openJob, description 
           break
         }
         case 'j': {
-          moveTo(activeIndex + 1)
+          moveTo(currentIndex + 1)
           break
         }
         case 'k': {
-          moveTo(activeIndex - 1)
+          moveTo(currentIndex - 1)
           break
         }
         case 'Enter':
         case 'o': {
           // Enter on a focused link or button keeps its native behavior.
           if (event.key === 'Enter' && event.target !== document.body) break
-          if (!url.openSlug) openAt(activeIndex, 'push')
+          if (!url.openSlug) openAt(currentIndex, 'push')
           break
         }
         default: {
@@ -169,7 +173,7 @@ export function JobBoard({ filters, jobs, total, openSlug, openJob, description 
               }}
               job={job}
               href={`${pathname}${buildJobSearch(url.filters, job.slug)}`}
-              isActive={index === activeIndex}
+              isActive={index === currentIndex}
               onHover={() => setActiveIndex(index)}
               onOpen={() => openAt(index, 'push')}
             />
