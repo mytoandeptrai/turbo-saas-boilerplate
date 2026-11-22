@@ -136,6 +136,16 @@ export function JobBoard({ filters, jobs, total, openSlug, openJob, description 
 
   useEffect(() => () => clearTimeout(debounceRef.current ?? undefined), [])
 
+  // Back/forward restores an earlier search: drop the typed text so the box follows the URL.
+  useEffect(() => {
+    const onPopState = () => {
+      clearTimeout(debounceRef.current ?? undefined)
+      setDraftQuery(null)
+    }
+    globalThis.addEventListener('popstate', onPopState)
+    return () => globalThis.removeEventListener('popstate', onPopState)
+  }, [])
+
   const drawerJob = url.openSlug
     ? (jobs.find((job) => job.slug === url.openSlug) ??
       (openJob?.slug === url.openSlug ? openJob : null))
