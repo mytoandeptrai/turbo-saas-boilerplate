@@ -1,11 +1,13 @@
+import { Button } from '@workspace/ui/components/button'
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
 } from '@workspace/ui/components/sheet'
-import { ArrowUpRightIcon } from 'lucide-react'
+import { ArrowUpRightIcon, XIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { useJobLabels } from '@/features/jobs/use-job-labels'
@@ -42,6 +44,8 @@ export function JobDrawer({ open, job, description, onClose }: JobDrawerProps) {
     <Sheet open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
       <SheetContent
         side="right"
+        // The built-in close button has a fixed English label.
+        showCloseButton={false}
         className="gap-0 data-[side=right]:w-full data-[side=right]:sm:max-w-2xl"
       >
         {job ? (
@@ -96,6 +100,12 @@ export function JobDrawer({ open, job, description, onClose }: JobDrawerProps) {
             <SheetDescription>{t('unavailableDescription')}</SheetDescription>
           </SheetHeader>
         )}
+        <SheetClose
+          aria-label={t('close')}
+          render={<Button variant="ghost" size="icon-sm" className="absolute top-4 right-4" />}
+        >
+          <XIcon />
+        </SheetClose>
       </SheetContent>
     </Sheet>
   )

@@ -48,6 +48,7 @@
     "UNKNOWN": "Chưa rõ khu vực"
   },
   "JobDetail": {
+    "close": "Đóng",
     "apply": "Ứng tuyển trên ATS chính thức",
     "posted": "Đăng {age}",
     "noDescription": "Việc làm này chưa có mô tả. Xem tin gốc để biết chi tiết.",

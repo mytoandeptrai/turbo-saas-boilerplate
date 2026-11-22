@@ -48,6 +48,7 @@
     "UNKNOWN": "Region unverified"
   },
   "JobDetail": {
+    "close": "Close",
     "apply": "Apply on Official ATS",
     "posted": "Posted {age}",
     "noDescription": "No description was published for this job. See the official posting for details.",
