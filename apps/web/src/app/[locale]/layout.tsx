@@ -27,14 +27,19 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
   if (!hasLocale(routing.locales, locale)) return {}
   const t = await getTranslations({ locale, namespace: 'Metadata' })
 
+  const siteUrl = env.NEXT_PUBLIC_APP_URL
+
   return {
-    metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
     title: t('title'),
     description: t('description'),
-    alternates: {
-      canonical: `/${locale}`,
-      languages: Object.fromEntries(routing.locales.map((code) => [code, `/${code}`])),
-    },
+    // Canonical and hreflang links are absolute, so they are left out until the public origin is set.
+    ...(siteUrl && {
+      metadataBase: new URL(siteUrl),
+      alternates: {
+        canonical: `/${locale}`,
+        languages: Object.fromEntries(routing.locales.map((code) => [code, `/${code}`])),
+      },
+    }),
   }
 }
 
