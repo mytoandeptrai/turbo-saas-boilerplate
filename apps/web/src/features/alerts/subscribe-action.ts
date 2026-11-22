@@ -9,7 +9,7 @@ export type SubscribeState =
   | { status: 'success' }
   | { status: 'error'; message: string }
 
-/** Stores a job-alert subscriber; submitting the same contact twice is a no-op. */
+/** Stores job-alert contacts; submitting the same contact twice is a no-op. */
 export async function subscribeToAlerts(
   _previous: SubscribeState,
   formData: FormData,
@@ -23,15 +23,14 @@ export async function subscribeToAlerts(
   }
 
   const { email, telegram } = parsed.data
-  const contacts = [...(email ? [{ email }] : []), ...(telegram ? [{ telegram }] : [])]
   try {
-    const existing = await db.jobAlertSubscriber.findFirst({ where: { OR: contacts } })
-    await (existing
-      ? db.jobAlertSubscriber.update({
-          where: { id: existing.id },
-          data: { email: existing.email ?? email, telegram: existing.telegram ?? telegram },
-        })
-      : db.jobAlertSubscriber.create({ data: { email, telegram } }))
+    // One row per contact: a submission never changes a row someone else created.
+    await Promise.all([
+      email &&
+        db.jobAlertSubscriber.upsert({ where: { email }, update: {}, create: { email } }),
+      telegram &&
+        db.jobAlertSubscriber.upsert({ where: { telegram }, update: {}, create: { telegram } }),
+    ])
     return { status: 'success' }
   } catch {
     return { status: 'error', message: 'Could not save your subscription. Please try again.' }
