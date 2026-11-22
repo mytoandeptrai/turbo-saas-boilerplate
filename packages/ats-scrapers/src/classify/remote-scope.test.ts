@@ -46,7 +46,6 @@ describe('classifyRemoteScope', () => {
       'Enterprise Account Executive - USA',
       'Senior Solution Engineer - North America',
       'Account Management Director (EU) or (US)',
-      'Channel Sales Manager - SEA',
       'Lead Instructor: Data Center Technician (Australia)',
       'Regional Sales Director - West Coast',
     ])('does not call "%s" worldwide', (title) => {
@@ -60,6 +59,7 @@ describe('classifyRemoteScope', () => {
       'Join us: Founding GTM',
       'Overseas Support Engineer',
       'Indiana Jones Fan Club Manager',
+      'SEO/SEA Specialist (Remote Worldwide)',
     ])('keeps "%s" worldwide', (title) => {
       expect(classifyRemoteScope('Remote - Remote', title)).toBe('WORLDWIDE')
     })

@@ -44,8 +44,11 @@ const TITLE_REGION_NAMES = [
   'West Coast',
   'East Coast',
 ]
-/** Matched case-sensitively: "US" is a region, "us" is not. */
-const TITLE_REGION_CODES = ['US', 'USA', 'EU', 'UK', 'SEA', 'AMER', 'ANZ', 'APJ', 'MENA', 'DACH']
+/**
+ * Matched case-sensitively: "US" is a region, "us" is not. "SEA" is left out because it
+ * also abbreviates search engine advertising.
+ */
+const TITLE_REGION_CODES = ['US', 'USA', 'EU', 'UK', 'AMER', 'ANZ', 'APJ', 'MENA', 'DACH']
 
 const TITLE_REGION_PATTERNS = [
   ...TITLE_REGION_NAMES.map((name) => toPattern(name)),
