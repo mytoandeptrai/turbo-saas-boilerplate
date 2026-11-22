@@ -106,6 +106,27 @@ describe('buildJobWhere', () => {
     ])
   })
 
+
+  it('matches tech tags by alias in free-text search', () => {
+    expect(buildJobWhere({ ...DEFAULT_FILTERS, region: 'all', q: 'PostgreSQL' }).AND).toEqual([
+      {
+        OR: [
+          { title: { contains: 'PostgreSQL', mode: 'insensitive' } },
+          { company: { name: { contains: 'PostgreSQL', mode: 'insensitive' } } },
+          { techTags: { hasSome: ['Postgres'] } },
+        ],
+      },
+    ])
+    expect(buildJobWhere({ ...DEFAULT_FILTERS, region: 'all', q: 'golang' }).AND).toEqual([
+      {
+        OR: [
+          { title: { contains: 'golang', mode: 'insensitive' } },
+          { company: { name: { contains: 'golang', mode: 'insensitive' } } },
+          { techTags: { hasSome: ['Go'] } },
+        ],
+      },
+    ])
+  })
   it('searches only title and company when no tag matches', () => {
     expect(buildJobWhere({ ...DEFAULT_FILTERS, region: 'all', q: 'acme' }).AND).toEqual([
       {

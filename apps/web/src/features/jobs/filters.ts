@@ -1,4 +1,4 @@
-import { TECH_TAGS } from '@workspace/ats-scrapers/tech-tags'
+import { extractTechTags, TECH_TAGS } from '@workspace/ats-scrapers/tech-tags'
 
 import type { Prisma } from '@workspace/database'
 
@@ -88,7 +88,11 @@ export function buildJobWhere(filters: JobFilters): Prisma.JobWhereInput {
   }
   if (filters.q) {
     const needle = filters.q.toLowerCase()
-    const matchingTags = TECH_TAGS.filter((tag) => tag.toLowerCase().includes(needle))
+    // Aliases ("PostgreSQL", "golang") resolve to the canonical tag stored on the job.
+    const aliasTags = new Set(extractTechTags(filters.q))
+    const matchingTags = TECH_TAGS.filter(
+      (tag) => tag.toLowerCase().includes(needle) || aliasTags.has(tag),
+    )
     and.push({
       OR: [
         { title: { contains: filters.q, mode: 'insensitive' } },
